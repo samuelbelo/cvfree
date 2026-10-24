@@ -3,6 +3,7 @@ import type { ComponentType } from "react"
 import type { ResumeSettings } from "@/lib/resume/schema"
 
 import type { Ctx } from "./blocks"
+import { Atlas, Duo, Horizon, Nordic, Summit } from "./designs/columns"
 import { Bold, Ledger, Lisbon, Meridian, Oxford, Plain, Swift, TimelineDesign, Vector } from "./designs/single"
 
 export type TemplateTag = "ats" | "photo" | "two-column" | "docx" | "creative"
@@ -99,6 +100,51 @@ export const TEMPLATES: TemplateMeta[] = [
     supportsPhoto: true,
     defaults: { fonts: { heading: "montserrat", body: "nunito" }, uppercaseTitles: true, dateAlign: "right", skillsLayout: "columns", headerAlign: "left" },
     component: Bold,
+  },
+  {
+    id: "atlas",
+    name: "Atlas",
+    description: "Dark sidebar with photo and details. Personal and organized.",
+    tags: ["two-column", "photo"],
+    supportsPhoto: true,
+    defaults: { fonts: { heading: "montserrat", body: "lato" }, uppercaseTitles: true, dateAlign: "inline", skillsLayout: "bars", headerAlign: "left" },
+    component: Atlas,
+  },
+  {
+    id: "nordic",
+    name: "Nordic",
+    description: "Light tinted side column and a large name.",
+    tags: ["two-column", "photo"],
+    supportsPhoto: true,
+    defaults: { fonts: { heading: "raleway", body: "source-sans-3" }, uppercaseTitles: false, dateAlign: "inline", skillsLayout: "bars", headerAlign: "left" },
+    component: Nordic,
+  },
+  {
+    id: "summit",
+    name: "Summit",
+    description: "Centered header with photo and two columns split by hairlines.",
+    tags: ["two-column", "photo"],
+    supportsPhoto: true,
+    defaults: { fonts: { heading: "lora", body: "source-sans-3" }, uppercaseTitles: true, dateAlign: "inline", skillsLayout: "columns", headerAlign: "center" },
+    component: Summit,
+  },
+  {
+    id: "horizon",
+    name: "Horizon",
+    description: "Full-width color band header with a right side column.",
+    tags: ["two-column", "photo", "creative"],
+    supportsPhoto: true,
+    defaults: { fonts: { heading: "nunito", body: "nunito" }, uppercaseTitles: false, dateAlign: "inline", skillsLayout: "bars", headerAlign: "left" },
+    component: Horizon,
+  },
+  {
+    id: "duo",
+    name: "Duo",
+    description: "Two-tone two-column layout that still parses well.",
+    tags: ["two-column", "ats", "photo"],
+    supportsPhoto: true,
+    defaults: { fonts: { heading: "roboto", body: "roboto" }, uppercaseTitles: true, dateAlign: "inline", skillsLayout: "columns", headerAlign: "left" },
+    component: Duo,
   },
 ]
 
