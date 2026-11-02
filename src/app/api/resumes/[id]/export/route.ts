@@ -1,0 +1,65 @@
+import { NextResponse } from "next/server"
+
+import { fullName } from "@/lib/resume/format"
+import { resumeToText } from "@/lib/resume/text-export"
+import { renderDocx } from "@/lib/server/docx"
+import { renderPdf } from "@/lib/server/pdf"
+import { getResume } from "@/lib/server/repo"
+
+export const runtime = "nodejs"
+export const maxDuration = 60
+
+type Ctx = { params: Promise<{ id: string }> }
+
+function fileName(base: string, ext: string) {
+  const safe = base
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^A-Za-z0-9 _-]+/g, "")
+    .trim()
+    .replace(/\s+/g, "_")
+  return `${safe || "resume"}.${ext}`
+}
+
+/** GET /api/resumes/:id/export?format=pdf|docx|txt|json */
+export async function GET(request: Request, { params }: Ctx) {
+  const { id } = await params
+  const resume = await getResume(id)
+  if (!resume) return NextResponse.json({ error: "Not found" }, { status: 404 })
+
+  const search = new URL(request.url).searchParams
+  const format = search.get("format") ?? "pdf"
+  const disposition = search.get("inline") === "1" ? "inline" : "attachment"
+  const base = fullName(resume) ? `${fullName(resume)} ${resume.title === "Untitled resume" ? "" : resume.title}` : resume.title
+  const headers = (type: string, ext: string) => ({
+    "Content-Type": type,
+    "Content-Disposition": `${disposition}; filename="${fileName(base, ext)}"`,
+    "Cache-Control": "no-store",
+  })
+
+  try {
+    switch (format) {
+      case "pdf": {
+        const pdf = await renderPdf(resume)
+        return new Response(Buffer.from(pdf), { headers: headers("application/pdf", "pdf") })
+      }
+      case "docx": {
+        const docx = await renderDocx(resume)
+        return new Response(new Uint8Array(docx), {
+          headers: headers("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"),
+        })
+      }
+      case "txt":
+        return new Response(resumeToText(resume), { headers: headers("text/plain; charset=utf-8", "txt") })
+      case "json":
+        return new Response(JSON.stringify({ cvfree: 1, resume }, null, 2), {
+          headers: headers("application/json", "cvfree.json"),
+        })
+      default:
+        return NextResponse.json({ error: `Unknown format ${format}` }, { status: 400 })
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Export failed"
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
