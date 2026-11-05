@@ -1,0 +1,45 @@
+# cvfree, the open-source resume builder.
+#
+#   cp .env.example .env        (then edit it)
+#   docker compose up -d        (http://your-server:3000)
+#
+# With your own domain and automatic HTTPS (ports 80 and 443 must be free):
+#   set DOMAIN in .env, then
+#   docker compose --profile https up -d
+
+services:
+  cvfree:
+    build: .
+    image: ${CVFREE_IMAGE:-cvfree:latest}
+    container_name: cvfree
+    restart: unless-stopped
+    ports:
+      - "${CVFREE_PORT:-3000}:3000"
+    environment:
+      CVFREE_PASSWORD: ${CVFREE_PASSWORD:-}
+      AI_BASE_URL: ${AI_BASE_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+    volumes:
+      - cvfree-data:/data
+    # Lets the container reach services on the host, such as a local Ollama.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: cvfree-caddy
+    profiles: ["https"]
+    restart: unless-stopped
+    command: caddy reverse-proxy --from ${DOMAIN:-localhost} --to cvfree:3000
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy-data:/data
+    depends_on:
+      - cvfree
+
+volumes:
+  cvfree-data:
+  caddy-data:
