@@ -21,6 +21,9 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Resume language** for section titles and dates: English, Portuguese, Spanish, French, German.
 - **Public link.** One click gives a resume a read-only address you can send to a recruiter, with PDF and Word download. Revoke it any time.
 - **Cover letters.** One per application, created from a resume so name, contact details, fonts and color already match. Greeting, date and sign-off follow the letter's language. PDF, Word and text export, and an optional AI first draft from the posting.
+- **Help me write.** Sentence starters for the summary and for job bullets, by role family, in English and Portuguese. Every name and number is a placeholder in brackets: the shape is given, the facts are yours.
+- **Version history.** A copy is kept before each save (at most one every ten minutes, thirty kept). Restore any of them from the Download menu.
+- **Combine with.** Merge two resumes into a new one: summary, skills and languages are merged, jobs and education appended, originals untouched.
 - **Undo and redo**, autosave, optional password protection.
 
 ## A quick tour
