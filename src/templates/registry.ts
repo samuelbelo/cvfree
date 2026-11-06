@@ -140,8 +140,8 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     id: "duo",
     name: "Duo",
-    description: "Two-tone two-column layout that still parses well.",
-    tags: ["two-column", "ats", "photo"],
+    description: "Two-tone two-column layout with a tinted side panel.",
+    tags: ["two-column", "photo"],
     supportsPhoto: true,
     defaults: { fonts: { heading: "roboto", body: "roboto" }, uppercaseTitles: true, dateAlign: "inline", skillsLayout: "columns", headerAlign: "left" },
     component: Duo,

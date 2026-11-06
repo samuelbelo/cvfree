@@ -303,6 +303,22 @@ function LayoutTab() {
             <p className="text-xs text-muted-foreground">Skills placed in a narrow side column always use one column.</p>
           </>
         ) : null}
+        {s.skillsLayout !== "bars" ? (
+          <>
+            <div className="text-xs text-muted-foreground">Skill level</div>
+            <ChoiceGroup
+              value={s.skillLevelStyle}
+              onChange={(v) => setSettings((x) => void (x.skillLevelStyle = v))}
+              options={[
+                { value: "dots", label: "Dots" },
+                { value: "text", label: "Text" },
+              ]}
+            />
+            <p className="text-xs text-muted-foreground">
+              Dots are only visual. Text (&ldquo;Expert&rdquo;) is what a recruiter&apos;s software reads when it parses the PDF.
+            </p>
+          </>
+        ) : null}
         {s.skillsLayout === "inline" ? (
           <SelectField
             label="Divider"

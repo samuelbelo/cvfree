@@ -307,6 +307,8 @@ function Skills({ ctx, section, opts }: { ctx: Ctx; section: SectionOf<"skills">
   const labels = preset.languageLevels ? ctx.w.languageLevels : ctx.w.skillLevels
   const showLevel = section.showLevel
   const layout = ctx.s.skillsLayout
+  // Languages are always written out. Skills follow the setting.
+  const asText = preset.languageLevels || ctx.s.skillLevelStyle === "text"
 
   if (layout === "inline") {
     return (
@@ -316,7 +318,7 @@ function Skills({ ctx, section, opts }: { ctx: Ctx; section: SectionOf<"skills">
             {i > 0 ? <span className="cv-sep"> {ctx.s.skillsDivider === "," ? "" : ctx.s.skillsDivider} </span> : null}
             {item.name}
             {ctx.s.skillsDivider === "," && i < items.length - 1 ? "," : ""}
-            {showLevel && preset.languageLevels && item.level > 0 ? (
+            {showLevel && asText && item.level > 0 ? (
               <span className="cv-skill-level"> ({labels[item.level - 1]})</span>
             ) : null}
           </span>
@@ -352,7 +354,7 @@ function Skills({ ctx, section, opts }: { ctx: Ctx; section: SectionOf<"skills">
         <div key={item.id} className="cv-skill">
           <span className="cv-skill-name">{item.name}</span>
           {showLevel && item.level > 0 ? (
-            preset.languageLevels ? (
+            asText ? (
               <span className="cv-skill-level">{labels[item.level - 1]}</span>
             ) : (
               <LevelDots level={item.level} />
