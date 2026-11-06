@@ -201,6 +201,8 @@ export const resumeSchema = z.object({
   personal: personalSchema,
   sections: z.array(sectionSchema).catch([]),
   settings: settingsSchema,
+  /** Random id of the public read-only link, or null when the resume is private. */
+  shareToken: z.string().regex(/^[A-Za-z0-9_-]{20,64}$/).nullable().catch(null),
 })
 
 export type TimelineItem = z.infer<typeof timelineItemSchema>

@@ -32,7 +32,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing resume data" }, { status: 400 })
     }
     const now = new Date().toISOString()
-    resume = normalizeResume({ ...(body.data as object), id: newId(), createdAt: now, updatedAt: now })
+    // A backup never brings its public link along. The import starts private.
+    resume = normalizeResume({ ...(body.data as object), id: newId(), createdAt: now, updatedAt: now, shareToken: null })
   } else if (body.mode === "sample") {
     resume = sampleResume({ locale, settings })
   } else {

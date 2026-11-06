@@ -2,7 +2,8 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { isValidSession, SESSION_COOKIE } from "@/lib/auth"
 
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health"]
+// /s/<token> is the public read-only link. The token is the whole secret.
+const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health", "/s", "/api/s"]
 
 export async function proxy(request: NextRequest) {
   const password = process.env.CVFREE_PASSWORD || ""

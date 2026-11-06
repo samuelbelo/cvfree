@@ -71,6 +71,7 @@ export function emptyResume(
     personal: personalSchema.parse({}),
     sections: DEFAULT_SECTIONS.map(createSection),
     settings: defaultSettings(opts.settings),
+    shareToken: null,
   }
 }
 

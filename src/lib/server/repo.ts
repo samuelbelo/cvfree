@@ -93,6 +93,14 @@ export async function getResume(id: string): Promise<Resume | null> {
   }
 }
 
+const SHARE_TOKEN = /^[A-Za-z0-9_-]{20,64}$/
+
+/** The resume behind a public link, or null when the token is unknown or was revoked. */
+export async function getResumeByShareToken(token: string): Promise<Resume | null> {
+  if (!SHARE_TOKEN.test(token)) return null
+  return (await getAllResumes()).find((r) => r.shareToken === token) ?? null
+}
+
 export async function saveResume(resume: Resume): Promise<Resume> {
   const next = normalizeResume({ ...resume, updatedAt: new Date().toISOString() })
   await writeJsonAtomic(fileFor(next.id), next)

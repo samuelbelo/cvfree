@@ -39,6 +39,7 @@ import { CustomizePanel } from "./customize-panel"
 import { EditPanel } from "./edit-panel"
 import { Preview } from "./preview"
 import { ReviewPanel } from "./review-panel"
+import { ShareDialog } from "./share-dialog"
 import { TailorPanel } from "./tailor-panel"
 
 type Tab = "edit" | "customize" | "review" | "tailor"
@@ -231,6 +232,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
           <Button variant="ghost" size="icon" disabled={!canRedo} onClick={() => useEditor.getState().redo()} aria-label="Redo">
             <Redo2 />
           </Button>
+          <ShareDialog />
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button className="ml-1" aria-label="Download" />}>
               <Download /> <span className="hidden sm:inline">Download</span> <ChevronDown className="hidden sm:block" />

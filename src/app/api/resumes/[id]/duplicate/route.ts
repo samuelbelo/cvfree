@@ -17,6 +17,7 @@ export async function POST(request: Request, { params }: Ctx) {
     title: body.title?.slice(0, 120) || `${source.title} (copy)`,
     createdAt: now,
     updatedAt: now,
+    shareToken: null,
   })
   return NextResponse.json(toSummary(copy), { status: 201 })
 }
