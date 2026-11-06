@@ -7,6 +7,7 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { matchKeywords } from "@/lib/resume/analysis"
@@ -47,6 +48,16 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
     }
   }
 
+  // A keyword from the posting is a question, not a fact. The dialog asks
+  // where the person used it before anything lands in the resume.
+  const [pick, setPick] = useState<string | null>(null)
+  const [evidence, setEvidence] = useState("")
+  const currentJob = useMemo(() => {
+    const exp = resume.sections.find((s) => s.type === "experience")
+    const item = exp?.kind === "timeline" ? exp.items.find((i) => i.title.trim() || i.subtitle.trim()) : undefined
+    return item ? { id: item.id, label: [item.title, item.subtitle].filter(Boolean).join(" at ") } : null
+  }, [resume.sections])
+
   const addSkill = (name: string) =>
     updateResume((d) => {
       let skills = d.sections.find((s) => s.type === "skills")
@@ -56,6 +67,21 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       }
       if (skills.kind === "skills") skills.items.push(createSkillItem({ name: name.replace(/\b\w/g, (c) => c.toUpperCase()), level: 0 }))
     })
+
+  const addBullet = (text: string) =>
+    updateResume((d) => {
+      const exp = d.sections.find((s) => s.type === "experience")
+      if (exp?.kind !== "timeline" || !currentJob) return
+      const item = exp.items.find((i) => i.id === currentJob.id)
+      if (!item) return
+      const li = `<li><p>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p></li>`
+      item.description = /<\/ul>\s*$/.test(item.description) ? item.description.replace(/<\/ul>\s*$/, `${li}</ul>`) : `${item.description}<ul>${li}</ul>`
+    })
+
+  const closePick = () => {
+    setPick(null)
+    setEvidence("")
+  }
 
   const runAi = async () => {
     setAiLoading(true)
@@ -102,6 +128,53 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
 
   return (
     <div className="grid gap-4">
+      <Dialog open={pick !== null} onOpenChange={(open) => !open && closePick()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add &ldquo;{pick}&rdquo;?</DialogTitle>
+            <DialogDescription>
+              The posting mentions it. Only add it if you really have it. A sentence about where you used it, with a result, says more than a word
+              in a list.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={evidence}
+            onChange={(e) => setEvidence(e.target.value)}
+            placeholder={currentJob ? `Where did you use ${pick}? For example: "Moved the deploys to ${pick}, cutting release time from a day to an hour."` : "Add a job under Experience first to write where you used it."}
+            disabled={!currentJob}
+            className="min-h-24 text-sm"
+            aria-label="Where you used it"
+          />
+          <DialogFooter className="sm:justify-between">
+            <Button variant="ghost" onClick={closePick}>
+              Not really, skip
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (pick) addSkill(pick)
+                  closePick()
+                }}
+              >
+                Skills list only
+              </Button>
+              <Button
+                disabled={!currentJob || evidence.trim().length < 15}
+                onClick={() => {
+                  if (pick) {
+                    addSkill(pick)
+                    addBullet(evidence.trim())
+                  }
+                  closePick()
+                }}
+              >
+                Add bullet to {currentJob ? currentJob.label.split(" at ")[0] : "job"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
         <h3 className="font-semibold">Got a posting? Paste the link or the description</h3>
         <div className="flex gap-2">
@@ -144,7 +217,7 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {report.missing.map((k) => (
-                  <button key={k} type="button" onClick={() => addSkill(k)}>
+                  <button key={k} type="button" onClick={() => setPick(k)}>
                     <Badge variant="outline" className="cursor-pointer gap-1 hover:bg-muted">
                       <Plus className="size-3" /> {k}
                     </Badge>
