@@ -19,6 +19,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Tailor.** Paste a job link or description, get a keyword match score and add missing skills in one click. Save a tailored copy.
 - **Optional AI** review and tailoring with any OpenAI-compatible API, including a local Ollama.
 - **Resume language** for section titles and dates: English, Portuguese, Spanish, French, German.
+- **Public link.** One click gives a resume a read-only address you can send to a recruiter, with PDF and Word download. Revoke it any time.
 - **Undo and redo**, autosave, optional password protection.
 
 ## A quick tour
@@ -67,6 +68,12 @@ The editor works on small screens too. Switch between the form and the preview w
 
 <p align="center"><img src="docs/screenshots/mobile.png" alt="Editor and preview on a phone" width="640"></p>
 
+### Public link
+
+The Share button in the editor gives the resume a read-only address like `https://cv.example.com/s/gP-ywzw2ydBe2QhvztNbk6zV`. Anyone with the link sees the latest saved version and can download the PDF or the Word file. They cannot edit it, cannot see your other resumes, and the page asks search engines not to index it. Revoke the link and the address stops working at once. A duplicate or an imported backup never carries the link along.
+
+![Share dialog with the public link](docs/screenshots/share.png)
+
 ### Settings
 
 Defaults for new resumes (template, language and color), and a status panel that shows where data is stored, which browser renders PDFs, and whether AI and the password are on.
@@ -109,15 +116,31 @@ docker compose up -d --build
 
 ### Backup and restore
 
+Everything lives in one Docker volume: the resumes (one JSON file each, photos included) and `settings.json`. The compose file pins the project name, so the volume is always called `cvfree_cvfree-data`. Check with `docker volume ls`.
+
+Back up, from the folder with the compose file:
+
 ```bash
 docker run --rm -v cvfree_cvfree-data:/data -v "$PWD":/backup alpine tar czf /backup/cvfree-backup.tgz -C /data .
 ```
 
+Restore on a clean install (start the app once first, so the volume exists, then stop it):
+
 ```bash
-docker run --rm -v cvfree_cvfree-data:/data -v "$PWD":/backup alpine tar xzf /backup/cvfree-backup.tgz -C /data
+docker compose down
 ```
 
-Each resume is also downloadable as JSON from the editor and can be imported from the dashboard.
+```bash
+docker run --rm -v cvfree_cvfree-data:/data -v "$PWD":/backup alpine sh -c "rm -rf /data/* && tar xzf /backup/cvfree-backup.tgz -C /data && chown -R 100:101 /data"
+```
+
+```bash
+docker compose up -d
+```
+
+The `chown` matters: the app runs as its own user inside the container and cannot write files the restore created as root.
+
+Each resume is also downloadable as JSON from the editor and can be imported from the dashboard, which is the quickest way to move one resume between installs.
 
 ## Configuration
 
