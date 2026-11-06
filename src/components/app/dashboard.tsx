@@ -3,9 +3,10 @@
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Copy, Download, FilePlus2, FileUp, Mail, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
+import { Copy, Download, FilePlus2, FileUp, Mail, Merge, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
+import { CombineDialog } from "@/components/app/combine-dialog"
 import { createLetter, LettersPanel } from "@/components/app/letters-panel"
 import { PromptDialog } from "@/components/app/prompt-dialog"
 import { TemplateThumb } from "@/components/editor/template-thumb"
@@ -55,6 +56,7 @@ export function Dashboard({
   const [busy, setBusy] = useState(false)
   const [toDelete, setToDelete] = useState<Resume | null>(null)
   const [toRename, setToRename] = useState<Resume | null>(null)
+  const [toCombine, setToCombine] = useState<Resume | null>(null)
 
   const create = async (mode: "blank" | "sample", data?: unknown) => {
     setBusy(true)
@@ -198,6 +200,9 @@ export function Dashboard({
                   <DropdownMenuItem onClick={() => createLetter(router, r.id)}>
                     <Mail /> New cover letter
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setToCombine(r)} disabled={resumes.length < 2}>
+                    <Merge /> Combine with
+                  </DropdownMenuItem>
                   <DropdownMenuItem render={<a href={`/api/resumes/${r.id}/export?format=pdf`} download />}>
                     <Download /> Download PDF
                   </DropdownMenuItem>
@@ -216,6 +221,8 @@ export function Dashboard({
       </div>
 
       <LettersPanel letters={letters} resumes={resumes.map((r) => ({ id: r.id, title: r.title }))} />
+
+      <CombineDialog target={toCombine} resumes={resumes} onOpenChange={(open) => !open && setToCombine(null)} />
 
       <PromptDialog
         open={Boolean(toRename)}
