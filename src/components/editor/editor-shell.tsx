@@ -15,6 +15,7 @@ import {
   Printer,
   Redo2,
   Undo2,
+  History,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -39,6 +40,7 @@ import { CustomizePanel } from "./customize-panel"
 import { EditPanel } from "./edit-panel"
 import { Preview } from "./preview"
 import { ReviewPanel } from "./review-panel"
+import { HistoryDialog } from "./history-dialog"
 import { ShareDialog } from "./share-dialog"
 import { TailorPanel } from "./tailor-panel"
 
@@ -59,6 +61,8 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
   const canRedo = useEditor((s) => s.future.length > 0)
   const [tab, setTab] = useState<Tab>("edit")
   const [mobilePreview, setMobilePreview] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
+  const [historyKey, setHistoryKey] = useState(0)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savedRevision = useRef(0)
   // The updatedAt this editor last saw. The server refuses a save based on an older one.
@@ -254,6 +258,15 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
               <DropdownMenuItem onClick={print}>
                 <Printer /> Print from browser
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setHistoryKey((k) => k + 1)
+                  setHistoryOpen(true)
+                }}
+              >
+                <History /> Version history
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -282,6 +295,17 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
         </ScrollArea>
         <Preview resume={resume} className={cn("min-h-0 border-l bg-muted/60", mobilePreview ? "flex" : "hidden md:flex")} />
       </div>
+      <HistoryDialog
+        key={historyKey}
+        resumeId={resume.id}
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        onRestored={(restored) => {
+          useEditor.getState().load(restored)
+          baseUpdatedAt.current = restored.updatedAt
+          savedRevision.current = 0
+        }}
+      />
     </div>
   )
 }
