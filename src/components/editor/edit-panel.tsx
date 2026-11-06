@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, type ReactNode } from "react"
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react"
 import {
   ChevronDown,
   Columns2,
@@ -41,6 +41,9 @@ import { MonthPicker } from "./month-picker"
 import { PhotoUpload } from "./photo-upload"
 import { SectionBodyEditor } from "./section-editors"
 
+/** When set, every Card starts in this state. Used by "Collapse all" / "Expand all". */
+const CardDefaults = createContext<boolean | null>(null)
+
 export function Card({
   title,
   description,
@@ -58,7 +61,8 @@ export function Card({
   defaultOpen?: boolean
   muted?: boolean
 }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const forced = useContext(CardDefaults)
+  const [open, setOpen] = useState(forced ?? defaultOpen)
   return (
     <div className={cn("group/card rounded-xl border bg-card shadow-xs", muted && "opacity-60")}>
       <div className="flex items-center gap-1 px-4 py-3">
@@ -82,11 +86,21 @@ export function Card({
 export function EditPanel() {
   const resume = useResume()
   const { score, missing } = useMemo(() => completeness(resume), [resume])
+  // Remounting the cards with a new key resets their open state to the forced value.
+  const [fold, setFold] = useState<{ gen: number; open: boolean | null }>({ gen: 0, open: null })
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <div className="rounded-xl border bg-card p-4 shadow-xs">
         <div className="flex items-center gap-2 text-sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="order-last ml-auto text-muted-foreground"
+            onClick={() => setFold((f) => ({ gen: f.gen + 1, open: f.open === false ? true : false }))}
+          >
+            {fold.open === false ? "Expand all" : "Collapse all"}
+          </Button>
           <span
             className={cn(
               "rounded-md px-1.5 py-0.5 text-xs font-semibold text-white",
@@ -106,9 +120,13 @@ export function EditPanel() {
         {missing.length ? <p className="mt-2 text-xs text-muted-foreground">Next: {missing[0]}</p> : null}
       </div>
 
-      <HeaderFooterCard />
-      <PersonalCard />
-      <SectionsList />
+      <CardDefaults.Provider value={fold.open}>
+        <div key={fold.gen} className="grid grid-cols-[minmax(0,1fr)] gap-4">
+          <HeaderFooterCard />
+          <PersonalCard />
+          <SectionsList />
+        </div>
+      </CardDefaults.Provider>
       <AddSection />
     </div>
   )
