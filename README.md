@@ -126,6 +126,7 @@ All settings are environment variables. Set them in `.env` when using compose.
 | Variable | Default | What it does |
 | --- | --- | --- |
 | `CVFREE_PORT` | `3000` | Host port (compose only) |
+| `CVFREE_BIND` | `0.0.0.0` | Interface the port is published on. Use `127.0.0.1` with the HTTPS profile, so only Caddy is reachable. |
 | `CVFREE_PASSWORD` | empty | Password gate for the whole app. Set it on any public server. |
 | `DOMAIN` | empty | Domain for the optional Caddy HTTPS proxy |
 | `DATA_DIR` | `/data` in Docker, `./data` locally | Where resumes and settings are stored |
@@ -136,6 +137,15 @@ All settings are environment variables. Set them in `.env` when using compose.
 | `AI_MODEL` | empty | Model name. AI features stay off until this is set. |
 
 The Settings page in the app shows which of these are active, and lets you pick defaults for new resumes.
+
+## Security notes
+
+- **One password, one workspace.** `CVFREE_PASSWORD` protects the whole instance. Everyone who knows it sees and edits every resume. It is made for one person or one household, not for a public service with accounts.
+- **Without a password, anyone who can reach the port can read and change every resume.** Keep the port on your LAN or behind a VPN, or set the password.
+- **Job postings are fetched from public addresses only.** The Tailor tab refuses links to localhost, private networks, cloud metadata addresses and anything that redirects there. Pasting the text always works.
+- **Rich text is cleaned on save and on render.** Only paragraphs, lists, bold, italic, underline, strike, alignment and `http`, `https`, `mailto` or `tel` links survive, including in imported JSON.
+- **Logins are rate limited** per client address, and the session cookie is `HttpOnly`, `SameSite=Lax` and `Secure` behind HTTPS.
+- Found a problem? Open an issue without personal data, or email the maintainer address on the GitHub profile for anything sensitive.
 
 ## Local development
 
