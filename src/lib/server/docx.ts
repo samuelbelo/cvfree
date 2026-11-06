@@ -5,6 +5,7 @@ import {
   BorderStyle,
   Document,
   ExternalHyperlink,
+  HeadingLevel,
   ImageRun,
   LevelFormat,
   Packer,
@@ -171,8 +172,10 @@ export async function renderDocx(resume: Resume): Promise<Buffer> {
 
   for (const section of resume.sections.filter(hasContent)) {
     const title = sectionTitle(section, resume.locale)
+    // A real Heading 1 style, so Word's navigation pane and screen readers see the sections.
     children.push(
       new Paragraph({
+        heading: HeadingLevel.HEADING_1,
         spacing: { before: pt(s.spacing.section) * 10, after: pt(s.spacing.title) * 10 },
         border: { bottom: { style: BorderStyle.SINGLE, size: 6, color, space: 1 } },
         keepNext: true,
@@ -191,8 +194,24 @@ export async function renderDocx(resume: Resume): Promise<Buffer> {
   }
 
   const doc = new Document({
-    creator: "cvfree.io",
-    title: resume.title,
+    creator: fullName(resume) || "cvfree",
+    title: fullName(resume) ? `${fullName(resume)} – ${resume.title}` : resume.title,
+    subject: p.jobTitle,
+    styles: {
+      default: { document: { run: { font: bodyFont, size: body.size } } },
+      // Word's default Heading 1 is big and blue. Override it so the run formatting above is what shows.
+      paragraphStyles: [
+        {
+          id: "Heading1",
+          name: "Heading 1",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: { font: headingFont, size: pt(s.fontSize.section), bold: s.fontWeight.section >= 600, color },
+          paragraph: { outlineLevel: 0 },
+        },
+      ],
+    },
     numbering: {
       config: [
         {
@@ -209,7 +228,6 @@ export async function renderDocx(resume: Resume): Promise<Buffer> {
         },
       ],
     },
-    styles: { default: { document: { run: { font: bodyFont, size: body.size } } } },
     sections: [
       {
         properties: {

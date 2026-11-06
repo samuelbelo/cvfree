@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { fullName } from "@/lib/resume/format"
 import { resumeToText } from "@/lib/resume/text-export"
 import { renderDocx } from "@/lib/server/docx"
+import { contentDisposition } from "@/lib/server/download"
 import { renderPdf } from "@/lib/server/pdf"
 import { getResume } from "@/lib/server/repo"
 
@@ -10,16 +11,6 @@ export const runtime = "nodejs"
 export const maxDuration = 60
 
 type Ctx = { params: Promise<{ id: string }> }
-
-function fileName(base: string, ext: string) {
-  const safe = base
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^A-Za-z0-9 _-]+/g, "")
-    .trim()
-    .replace(/\s+/g, "_")
-  return `${safe || "resume"}.${ext}`
-}
 
 /** GET /api/resumes/:id/export?format=pdf|docx|txt|json */
 export async function GET(request: Request, { params }: Ctx) {
@@ -33,7 +24,7 @@ export async function GET(request: Request, { params }: Ctx) {
   const base = fullName(resume) ? `${fullName(resume)} ${resume.title === "Untitled resume" ? "" : resume.title}` : resume.title
   const headers = (type: string, ext: string) => ({
     "Content-Type": type,
-    "Content-Disposition": `${disposition}; filename="${fileName(base, ext)}"`,
+    "Content-Disposition": contentDisposition(disposition, base, ext),
     "Cache-Control": "no-store",
   })
 

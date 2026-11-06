@@ -6,6 +6,7 @@ import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
 import puppeteer, { type Browser } from "puppeteer-core"
 
 import { SESSION_COOKIE, sessionToken } from "@/lib/auth"
+import { fullName } from "@/lib/resume/format"
 import { WORDS } from "@/lib/resume/i18n"
 import type { Resume } from "@/lib/resume/schema"
 
@@ -74,43 +75,40 @@ export async function renderPdf(resume: Resume): Promise<Uint8Array> {
 }
 
 /**
- * The page has no CSS margins (so colored sidebars reach the edges), which
- * leaves no room for Chrome's header and footer. Page numbers and the
- * header/footer text are drawn onto the finished PDF instead.
+ * Header and footer text are part of the printed page (see PrintChrome), so
+ * they keep the resume's font and any script. Only the page count is known
+ * after printing: it is stamped here. The label is a number or a short
+ * localized word, which fits the built-in Helvetica.
  */
 async function stampPages(bytes: Uint8Array, resume: Resume): Promise<Uint8Array> {
   const s = resume.settings
-  if (s.pageNumbering === "none" && !s.headerText.trim() && !s.footerText.trim()) return bytes
   const doc = await PDFDocument.load(bytes)
-  const font = await doc.embedFont(StandardFonts.Helvetica)
-  const pages = doc.getPages()
-  const total = pages.length
-  const words = WORDS[resume.locale]
-  const size = 7.5
-  const gray = rgb(0.45, 0.47, 0.5)
-  const edge = Math.max(10, (s.page.marginY * 72) / 25.4 / 2.4)
+  const name = fullName(resume)
+  doc.setTitle(name ? `${name} \u2013 ${resume.title}` : resume.title)
+  if (name) doc.setAuthor(name)
+  doc.setSubject(resume.personal.jobTitle)
+  doc.setCreator("cvfree")
+  doc.setProducer("cvfree")
+  doc.setLanguage(resume.locale)
 
-  pages.forEach((page, index) => {
-    const { width, height } = page.getSize()
-    const n = index + 1
-    const label =
-      s.pageNumbering === "numbers"
-        ? `${n}`
-        : s.pageNumbering === "fraction"
-          ? `${n}/${total}`
-          : s.pageNumbering === "page"
-            ? `${words.page} ${n} ${words.of} ${total}`
-            : ""
-    const draw = (text: string, x: "left" | "center" | "right", y: number) => {
-      const clean = text.replace(/[^\x20-\x7E\u00A0-\u00FF]/g, "")
-      const w = font.widthOfTextAtSize(clean, size)
-      const margin = (s.page.marginX * 72) / 25.4
-      const px = x === "left" ? margin : x === "right" ? width - margin - w : (width - w) / 2
-      page.drawText(clean, { x: px, y, size, font, color: gray })
-    }
-    if (s.headerText.trim()) draw(s.headerText.trim(), "center", height - edge - size)
-    if (s.footerText.trim()) draw(s.footerText.trim(), label ? "left" : "center", edge)
-    if (label) draw(label, s.footerText.trim() ? "right" : "center", edge)
-  })
+  if (s.pageNumbering !== "none") {
+    const font = await doc.embedFont(StandardFonts.Helvetica)
+    const pages = doc.getPages()
+    const total = pages.length
+    const words = WORDS[resume.locale]
+    const size = 7.5
+    const gray = rgb(0.45, 0.47, 0.5)
+    const edge = Math.max(10, (s.page.marginY * 72) / 25.4 / 2.4)
+    const margin = (s.page.marginX * 72) / 25.4
+    pages.forEach((page, index) => {
+      const { width } = page.getSize()
+      const n = index + 1
+      const label =
+        s.pageNumbering === "numbers" ? `${n}` : s.pageNumbering === "fraction" ? `${n}/${total}` : `${words.page} ${n} ${words.of} ${total}`
+      const w = font.widthOfTextAtSize(label, size)
+      const x = s.footerText.trim() ? width - margin - w : (width - w) / 2
+      page.drawText(label, { x, y: edge + 2.5, size, font, color: gray })
+    })
+  }
   return await doc.save()
 }
