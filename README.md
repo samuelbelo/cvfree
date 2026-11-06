@@ -138,6 +138,20 @@ All settings are environment variables. Set them in `.env` when using compose.
 
 The Settings page in the app shows which of these are active, and lets you pick defaults for new resumes.
 
+## Releases
+
+Versions follow [semantic versioning](https://semver.org/) and are cut automatically from the commit messages ([Conventional Commits](https://www.conventionalcommits.org/)): a `fix:` on `main` becomes a patch release, a `feat:` a minor one. Each release gets a tag, an entry in [CHANGELOG.md](CHANGELOG.md), a GitHub release and a Docker image.
+
+Image tags on `ghcr.io/samuelbelo/cvfree`:
+
+| Tag | Meaning |
+| --- | --- |
+| `0.2.1` | that exact release, never changes |
+| `0.2` | the latest patch of that minor |
+| `latest` | the latest release |
+
+Pin the exact version in `.env` (`CVFREE_IMAGE=ghcr.io/samuelbelo/cvfree:0.2.1`) if you want upgrades to be a decision rather than a side effect of `docker compose pull`.
+
 ## Security notes
 
 - **One password, one workspace.** `CVFREE_PASSWORD` protects the whole instance. Everyone who knows it sees and edits every resume. It is made for one person or one household, not for a public service with accounts.
