@@ -7,6 +7,9 @@
 #   set DOMAIN in .env, then
 #   docker compose --profile https up -d
 
+# Fixed project name, so the volume is always "cvfree_cvfree-data" whatever the folder is called.
+name: cvfree
+
 services:
   cvfree:
     build: .
