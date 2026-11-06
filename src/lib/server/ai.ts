@@ -2,6 +2,7 @@ import "server-only"
 
 import { fullName, htmlToText } from "@/lib/resume/format"
 import { collectText } from "@/lib/resume/analysis"
+import type { Letter } from "@/lib/letter/schema"
 import type { Resume } from "@/lib/resume/schema"
 
 import { aiEnabled, config } from "./config"
@@ -88,4 +89,34 @@ export async function aiTailor(resume: Resume, jobDescription: string): Promise<
     `JOB POSTING:\n${jobDescription.slice(0, 12_000)}\n\nRESUME:\n${resumeForPrompt(resume)}`
   )
   return parseJson<AiTailor>(raw, { summary: "", keywords: [], suggestions: [raw] })
+}
+
+export type AiLetter = { paragraphs: string[] }
+
+/**
+ * Drafts the body of a cover letter from the resume and the posting. Plain
+ * paragraphs, no greeting or sign-off: the letter adds those itself.
+ */
+export async function aiLetter(letter: Letter, resume: Resume | null, jobDescription: string): Promise<AiLetter> {
+  const target = [
+    letter.recipient.company ? `Company: ${letter.recipient.company}` : "",
+    letter.recipient.position ? `Position: ${letter.recipient.position}` : "",
+    letter.recipient.name ? `Addressed to: ${letter.recipient.name}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n")
+  const raw = await chat(
+    "You write cover letters that sound like the candidate, not like a template. Use only facts from the resume, never invent employers, " +
+      "titles, dates or numbers. Three or four short paragraphs: why this role and company, what the candidate brings with one concrete result, " +
+      "and a short close that asks for a conversation. No greeting, no sign-off, no placeholders in brackets. " +
+      `Write in the language code "${letter.locale}". Return JSON: {"paragraphs": string[]}.`,
+    `${target}
+
+JOB POSTING:
+${jobDescription.slice(0, 12_000)}
+
+RESUME:
+${resume ? resumeForPrompt(resume) : "Sender: " + letter.sender.name + ", " + letter.sender.jobTitle}`
+  )
+  return parseJson<AiLetter>(raw, { paragraphs: [raw] })
 }

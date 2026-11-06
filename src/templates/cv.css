@@ -843,3 +843,96 @@ div.cv-item-sub {
   align-items: stretch;
   gap: 2pt;
 }
+
+/* ------------------------------------------------------------------ */
+/* Cover letter                                                        */
+/* ------------------------------------------------------------------ */
+
+.cv-letter {
+  padding: var(--cv-my) var(--cv-mx);
+  font-size: calc(var(--cv-fs-body) + 1pt);
+  line-height: calc(var(--cv-lh) + 0.15);
+}
+
+.cv-letter-head {
+  border-bottom: 1.5pt solid var(--cv-color);
+  padding-bottom: 8pt;
+  margin-bottom: 14pt;
+  text-align: var(--cv-align);
+}
+
+.cv-letter-name {
+  font-family: var(--cv-font-heading);
+  font-size: var(--cv-fs-name);
+  font-weight: var(--cv-fw-name);
+  color: var(--cv-color);
+  line-height: 1.15;
+}
+
+.cv-letter-title {
+  font-size: calc(var(--cv-fs-heading) + 1pt);
+  color: var(--cv-muted);
+  margin-top: 2pt;
+}
+
+.cv-letter-contact {
+  margin-top: 4pt;
+  font-size: calc(var(--cv-fs-body) - 0.5pt);
+  color: var(--cv-muted);
+}
+
+.cv-letter-sep {
+  margin: 0 5pt;
+}
+
+.cv-letter-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12pt;
+  margin-bottom: 12pt;
+}
+
+.cv-letter-to {
+  white-space: pre-line;
+}
+
+.cv-letter-date {
+  color: var(--cv-muted);
+  white-space: nowrap;
+}
+
+.cv-letter-re {
+  margin-bottom: 10pt;
+}
+
+.cv-letter-re strong {
+  color: var(--cv-color);
+}
+
+.cv-letter-greeting {
+  margin-bottom: 8pt;
+}
+
+.cv-letter-body p {
+  margin-bottom: 8pt;
+}
+
+.cv-letter-body ul,
+.cv-letter-body ol {
+  margin: 0 0 8pt 14pt;
+}
+
+.cv-letter-empty p {
+  color: var(--cv-muted);
+  font-style: italic;
+}
+
+.cv-letter-closing {
+  margin-top: 14pt;
+}
+
+.cv-letter-signature {
+  margin-top: 18pt;
+  font-weight: 600;
+}

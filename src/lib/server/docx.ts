@@ -14,6 +14,8 @@ import {
   TextRun,
 } from "docx"
 
+import { letterClosing, letterDate, letterGreeting } from "@/lib/letter/format"
+import type { Letter } from "@/lib/letter/schema"
 import { formatRange, fullName, hrefFor, htmlToText, prettyUrl, sectionTitle } from "@/lib/resume/format"
 import { WORDS } from "@/lib/resume/i18n"
 import { getPreset } from "@/lib/resume/presets"
@@ -325,4 +327,72 @@ function sectionParagraphs(
             })
         )
   }
+}
+
+/** Word version of a cover letter: the same blocks as the PDF, in one column. */
+export async function renderLetterDocx(letter: Letter): Promise<Buffer> {
+  const s = letter.settings
+  const w = WORDS[letter.locale]
+  const color = s.color.replace("#", "").slice(0, 6)
+  const headingFont = DOCX_FONT[s.fonts.heading]
+  const bodyFont = DOCX_FONT[s.fonts.body]
+  const body = { font: bodyFont, size: pt(s.fontSize.body + 1), spacing: pt(4) * 10 }
+  const page = PAGE_SIZE[s.page.format]
+  const sender = letter.sender
+  const r = letter.recipient
+  const line = (text: string, opts: { bold?: boolean; color?: string; size?: number; font?: string; after?: number } = {}) =>
+    new Paragraph({
+      spacing: { after: opts.after ?? 0 },
+      children: [new TextRun({ text, bold: opts.bold, color: opts.color, font: opts.font ?? bodyFont, size: opts.size ?? body.size })],
+    })
+  const children: Paragraph[] = []
+  const align = s.headerAlign === "center" ? AlignmentType.CENTER : s.headerAlign === "right" ? AlignmentType.RIGHT : AlignmentType.LEFT
+  children.push(
+    new Paragraph({
+      alignment: align,
+      children: [new TextRun({ text: sender.name || "Your Name", bold: true, font: headingFont, size: pt(s.fontSize.name), color })],
+    })
+  )
+  if (sender.jobTitle) children.push(new Paragraph({ alignment: align, children: [new TextRun({ text: sender.jobTitle, font: bodyFont, size: body.size, color: "5B6370" })] }))
+  const contact = [sender.email, sender.phone, sender.location, sender.website].filter((v) => v.trim()).join("  ·  ")
+  if (contact) {
+    children.push(
+      new Paragraph({
+        alignment: align,
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color, space: 4 } },
+        spacing: { after: pt(10) * 10 },
+        children: [new TextRun({ text: contact, font: bodyFont, size: pt(s.fontSize.body), color: "5B6370" })],
+      })
+    )
+  }
+  children.push(line(letterDate(letter), { color: "5B6370", after: pt(8) * 10 }))
+  for (const t of [r.company, r.name, r.address]) if (t.trim()) children.push(line(t.trim()))
+  if (r.position.trim()) children.push(line(`${w.regarding} ${r.position.trim()}`, { bold: true, after: pt(8) * 10 }))
+  else children.push(line("", { after: pt(4) * 10 }))
+  children.push(line(letterGreeting(letter), { after: pt(6) * 10 }))
+  children.push(...htmlToParagraphs(letter.body, body))
+  children.push(line(letterClosing(letter), { after: pt(14) * 10 }))
+  children.push(line(sender.name, { bold: true }))
+
+  const doc = new Document({
+    creator: sender.name || "cvfree",
+    title: `${sender.name || "Cover letter"} – ${r.company || "cover letter"}`,
+    subject: r.position,
+    numbering: {
+      config: [{ reference: "bullets", levels: [{ level: 0, format: LevelFormat.BULLET, text: "•", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 360, hanging: 220 } } } }] }],
+    },
+    styles: { default: { document: { run: { font: bodyFont, size: body.size } } } },
+    sections: [
+      {
+        properties: {
+          page: {
+            size: { width: page.widthMm * MM_TO_TWIP, height: page.heightMm * MM_TO_TWIP },
+            margin: { top: s.page.marginY * MM_TO_TWIP, bottom: s.page.marginY * MM_TO_TWIP, left: s.page.marginX * MM_TO_TWIP, right: s.page.marginX * MM_TO_TWIP },
+          },
+        },
+        children,
+      },
+    ],
+  })
+  return Buffer.from(await Packer.toBuffer(doc))
 }

@@ -1,12 +1,12 @@
 "use client"
 
-import { useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { Minus, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { WORDS } from "@/lib/resume/i18n"
-import type { Resume } from "@/lib/resume/schema"
+import type { Locale, Resume, ResumeSettings } from "@/lib/resume/schema"
 import { chromeEdge, ResumeDocument } from "@/templates/resume-document"
 import { MM_TO_PX, PAGE_SIZE } from "@/templates/style"
 
@@ -29,9 +29,9 @@ function useSize<T extends HTMLElement>() {
   return [ref, size] as const
 }
 
-function pageLabel(resume: Resume, n: number, total: number) {
-  const words = WORDS[resume.locale]
-  switch (resume.settings.pageNumbering) {
+function pageLabel(settings: ResumeSettings, locale: Locale, n: number, total: number) {
+  const words = WORDS[locale]
+  switch (settings.pageNumbering) {
     case "numbers":
       return `${n}`
     case "fraction":
@@ -43,17 +43,36 @@ function pageLabel(resume: Resume, n: number, total: number) {
   }
 }
 
-/**
- * Live preview. The real document is rendered at print size and scaled to
- * fit. Dashed lines mark where pages end. The PDF keeps entries whole, so a
- * break can move a few lines compared with the guide.
- */
+/** Live preview of a resume. */
 export function Preview({ resume, className }: { resume: Resume; className?: string }) {
+  return (
+    <PagePreview settings={resume.settings} locale={resume.locale} className={className}>
+      <ResumeDocument resume={resume} />
+    </PagePreview>
+  )
+}
+
+/**
+ * Any document rendered at print size and scaled to fit, with page break
+ * guides and a zoom bar. Dashed lines mark where pages end. The PDF keeps
+ * entries whole, so a break can move a few lines compared with the guide.
+ */
+export function PagePreview({
+  settings,
+  locale,
+  className,
+  children,
+}: {
+  settings: ResumeSettings
+  locale: Locale
+  className?: string
+  children: ReactNode
+}) {
   const [frameRef, frame] = useSize<HTMLDivElement>()
   const [docRef, doc] = useSize<HTMLDivElement>()
   const [zoom, setZoom] = useState(1)
 
-  const page = PAGE_SIZE[resume.settings.page.format]
+  const page = PAGE_SIZE[settings.page.format]
   const pageW = page.widthMm * MM_TO_PX
   const pageH = page.heightMm * MM_TO_PX
   const fit = frame.width ? Math.min(1.25, (frame.width - 48) / pageW) : 0.6
@@ -71,11 +90,9 @@ export function Preview({ resume, className }: { resume: Resume; className?: str
               className="absolute top-0 left-0 origin-top-left overflow-hidden rounded-sm bg-white shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
               style={{ transform: `scale(${scale})`, width: pageW }}
             >
-              <div ref={docRef}>
-                <ResumeDocument resume={resume} />
-              </div>
+              <div ref={docRef}>{children}</div>
               {Array.from({ length: pages }, (_, i) => (
-                <PageChrome key={i} resume={resume} index={i} total={pages} pageH={pageH} />
+                <PageChrome key={i} settings={settings} locale={locale} index={i} total={pages} pageH={pageH} />
               ))}
             </div>
           </div>
@@ -101,9 +118,8 @@ export function Preview({ resume, className }: { resume: Resume; className?: str
   )
 }
 
-function PageChrome({ resume, index, total, pageH }: { resume: Resume; index: number; total: number; pageH: number }) {
-  const s = resume.settings
-  const label = pageLabel(resume, index + 1, total)
+function PageChrome({ settings: s, locale, index, total, pageH }: { settings: ResumeSettings; locale: Locale; index: number; total: number; pageH: number }) {
+  const label = pageLabel(s, locale, index + 1, total)
   const edge = chromeEdge(s.page.marginY)
   const top = index * pageH
   const style = "pointer-events-none absolute right-0 left-0 text-[7.5pt] leading-3 text-[#737980]"

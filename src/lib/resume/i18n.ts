@@ -13,6 +13,11 @@ type Words = {
   skillLevels: [string, string, string, string, string]
   languageLevels: [string, string, string, string, string]
   details: string
+  /** Cover letters: "Dear", the no-name addressee, the sign-off and the subject label. */
+  dear: string
+  hiringManager: string
+  sincerely: string
+  regarding: string
 }
 
 export const WORDS: Record<Locale, Words> = {
@@ -29,6 +34,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Novice", "Beginner", "Skillful", "Experienced", "Expert"],
     languageLevels: ["Basic", "Conversational", "Proficient", "Fluent", "Native"],
     details: "Details",
+    dear: "Dear",
+    hiringManager: "Dear Hiring Manager",
+    sincerely: "Sincerely",
+    regarding: "Re:",
   },
   pt: {
     present: "Atual",
@@ -43,6 +52,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Iniciante", "Básico", "Competente", "Experiente", "Especialista"],
     languageLevels: ["Básico", "Conversação", "Proficiente", "Fluente", "Nativo"],
     details: "Detalhes",
+    dear: "Caro(a)",
+    hiringManager: "Exmos. Senhores",
+    sincerely: "Com os melhores cumprimentos",
+    regarding: "Assunto:",
   },
   "pt-BR": {
     present: "Atual",
@@ -57,6 +70,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Iniciante", "Básico", "Competente", "Experiente", "Especialista"],
     languageLevels: ["Básico", "Conversação", "Proficiente", "Fluente", "Nativo"],
     details: "Dados",
+    dear: "Prezado(a)",
+    hiringManager: "Prezada equipe de recrutamento",
+    sincerely: "Atenciosamente",
+    regarding: "Assunto:",
   },
   es: {
     present: "Actualidad",
@@ -71,6 +88,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Novato", "Principiante", "Competente", "Experimentado", "Experto"],
     languageLevels: ["Básico", "Conversacional", "Competente", "Fluido", "Nativo"],
     details: "Datos",
+    dear: "Estimado/a",
+    hiringManager: "Estimado equipo de selección",
+    sincerely: "Atentamente",
+    regarding: "Asunto:",
   },
   fr: {
     present: "Aujourd'hui",
@@ -85,6 +106,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Novice", "Débutant", "Compétent", "Expérimenté", "Expert"],
     languageLevels: ["Notions", "Conversation", "Courant", "Bilingue", "Langue maternelle"],
     details: "Coordonnées",
+    dear: "Bonjour",
+    hiringManager: "Madame, Monsieur",
+    sincerely: "Cordialement",
+    regarding: "Objet :",
   },
   de: {
     present: "Heute",
@@ -99,6 +124,10 @@ export const WORDS: Record<Locale, Words> = {
     skillLevels: ["Anfänger", "Grundkenntnisse", "Gut", "Sehr gut", "Experte"],
     languageLevels: ["Grundkenntnisse", "Konversation", "Gut", "Fließend", "Muttersprache"],
     details: "Kontakt",
+    dear: "Guten Tag",
+    hiringManager: "Sehr geehrte Damen und Herren",
+    sincerely: "Mit freundlichen Grüßen",
+    regarding: "Betreff:",
   },
 }
 

@@ -8,6 +8,7 @@ import puppeteer, { type Browser } from "puppeteer-core"
 import { SESSION_COOKIE, sessionToken } from "@/lib/auth"
 import { fullName } from "@/lib/resume/format"
 import { WORDS } from "@/lib/resume/i18n"
+import type { Letter } from "@/lib/letter/schema"
 import type { Resume } from "@/lib/resume/schema"
 
 import { config } from "./config"
@@ -50,11 +51,12 @@ async function getBrowser(): Promise<Browser> {
   return browserPromise
 }
 
-export async function renderPdf(resume: Resume): Promise<Uint8Array> {
+/** Print one of the app's own pages to PDF, as the headless browser sees it. */
+async function printPath(pathname: string): Promise<Uint8Array> {
   const browser = await getBrowser()
   const page = await browser.newPage()
   try {
-    const url = `${config.internalUrl}/print/${resume.id}`
+    const url = `${config.internalUrl}${pathname}`
     if (config.password) {
       await browser.setCookie({
         name: SESSION_COOKIE,
@@ -67,11 +69,29 @@ export async function renderPdf(resume: Resume): Promise<Uint8Array> {
     const res = await page.goto(url, { waitUntil: "networkidle0", timeout: 30_000 })
     if (!res || !res.ok()) throw new Error(`Print page returned ${res?.status() ?? "no response"}`)
     await page.evaluate(() => document.fonts.ready)
-    const pdf = await page.pdf({ printBackground: true, preferCSSPageSize: true })
-    return await stampPages(pdf, resume)
+    return await page.pdf({ printBackground: true, preferCSSPageSize: true })
   } finally {
     await page.close().catch(() => {})
   }
+}
+
+export async function renderPdf(resume: Resume): Promise<Uint8Array> {
+  const pdf = await printPath(`/print/${resume.id}`)
+  return await stampPages(pdf, resume)
+}
+
+export async function renderLetterPdf(letter: Letter): Promise<Uint8Array> {
+  const pdf = await printPath(`/print/letter/${letter.id}`)
+  const doc = await PDFDocument.load(pdf)
+  const name = letter.sender.name.trim()
+  const subject = letter.recipient.company ? `Cover letter, ${letter.recipient.company}` : "Cover letter"
+  doc.setTitle(name ? `${name} – ${subject}` : subject)
+  if (name) doc.setAuthor(name)
+  doc.setSubject(letter.recipient.position || subject)
+  doc.setCreator("cvfree")
+  doc.setProducer("cvfree")
+  doc.setLanguage(letter.locale)
+  return await doc.save()
 }
 
 /**

@@ -2,7 +2,7 @@ import { getPreset } from "./presets"
 import { WORDS } from "./i18n"
 import type { DateFormat, Locale, Resume, Section } from "./schema"
 
-const INTL_LOCALE: Record<Locale, string> = {
+export const INTL_LOCALE: Record<Locale, string> = {
   en: "en-US",
   pt: "pt-PT",
   "pt-BR": "pt-BR",

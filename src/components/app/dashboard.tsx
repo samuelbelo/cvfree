@@ -3,9 +3,10 @@
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Copy, Download, FilePlus2, FileUp, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
+import { Copy, Download, FilePlus2, FileUp, Mail, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
+import { createLetter, LettersPanel } from "@/components/app/letters-panel"
 import { PromptDialog } from "@/components/app/prompt-dialog"
 import { TemplateThumb } from "@/components/editor/template-thumb"
 import {
@@ -26,6 +27,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import type { LetterSummary } from "@/lib/letter/schema"
+import { completeness } from "@/lib/resume/analysis"
 import type { Resume } from "@/lib/resume/schema"
 import { getTemplate } from "@/templates/registry"
 
@@ -36,7 +39,17 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T
 }
 
-export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes: Resume[]; unreadable?: string[]; dataDir?: string }) {
+export function Dashboard({
+  resumes,
+  letters = [],
+  unreadable = [],
+  dataDir = "",
+}: {
+  resumes: Resume[]
+  letters?: LetterSummary[]
+  unreadable?: string[]
+  dataDir?: string
+}) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -159,6 +172,7 @@ export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes:
               className="relative block overflow-hidden rounded-xl border bg-white shadow-sm transition group-hover:-translate-y-0.5 group-hover:shadow-md"
             >
               <TemplateThumb resume={r} />
+              <ScoreBadge resume={r} />
             </Link>
             <div className="flex items-start gap-1">
               <Link href={`/resumes/${r.id}`} className="min-w-0 flex-1">
@@ -181,6 +195,9 @@ export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes:
                   <DropdownMenuItem onClick={() => duplicate(r)}>
                     <Copy /> Duplicate
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => createLetter(router, r.id)}>
+                    <Mail /> New cover letter
+                  </DropdownMenuItem>
                   <DropdownMenuItem render={<a href={`/api/resumes/${r.id}/export?format=pdf`} download />}>
                     <Download /> Download PDF
                   </DropdownMenuItem>
@@ -197,6 +214,8 @@ export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes:
           </div>
         ))}
       </div>
+
+      <LettersPanel letters={letters} resumes={resumes.map((r) => ({ id: r.id, title: r.title }))} />
 
       <PromptDialog
         open={Boolean(toRename)}
@@ -221,5 +240,20 @@ export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes:
         </AlertDialogContent>
       </AlertDialog>
     </main>
+  )
+}
+
+/** Same score as the editor's completeness bar, so the dashboard shows which resume still needs work. */
+function ScoreBadge({ resume }: { resume: Resume }) {
+  const { score } = completeness(resume)
+  return (
+    <span
+      className={`absolute top-2 right-2 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-white shadow ${
+        score >= 80 ? "bg-emerald-600" : score >= 50 ? "bg-amber-500" : "bg-rose-500"
+      }`}
+      title="Resume completeness"
+    >
+      {score}%
+    </span>
   )
 }
