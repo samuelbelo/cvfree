@@ -50,6 +50,24 @@ export async function getAllResumes(): Promise<Resume[]> {
   return items.filter((r): r is Resume => r !== null).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 }
 
+/**
+ * Files in the resumes folder that could not be parsed. They are never
+ * touched, so the dashboard can point at them instead of hiding them.
+ */
+export async function getUnreadableResumeFiles(): Promise<string[]> {
+  await ensureDir(resumesDir())
+  const files = (await fs.readdir(resumesDir())).filter((f) => f.endsWith(".json"))
+  const bad: string[] = []
+  for (const f of files) {
+    try {
+      normalizeResume(JSON.parse(await fs.readFile(path.join(resumesDir(), f), "utf8")))
+    } catch {
+      bad.push(f)
+    }
+  }
+  return bad
+}
+
 export async function listResumes(): Promise<ResumeSummary[]> {
   return (await getAllResumes()).map(toSummary)
 }

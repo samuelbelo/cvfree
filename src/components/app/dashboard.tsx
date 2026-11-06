@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Copy, Download, FilePlus2, FileUp, MoreVertical, Pencil, Sparkles, Trash2 } from "lucide-react"
+import { Copy, Download, FilePlus2, FileUp, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
 import { PromptDialog } from "@/components/app/prompt-dialog"
@@ -36,7 +36,7 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data as T
 }
 
-export function Dashboard({ resumes }: { resumes: Resume[] }) {
+export function Dashboard({ resumes, unreadable = [], dataDir = "" }: { resumes: Resume[]; unreadable?: string[]; dataDir?: string }) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
@@ -90,6 +90,25 @@ export function Dashboard({ resumes }: { resumes: Resume[] }) {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
+      {unreadable.length ? (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+          <div>
+            <p className="font-medium">
+              {unreadable.length === 1 ? "One resume file could not be read" : `${unreadable.length} resume files could not be read`}
+            </p>
+            <p className="mt-1">
+              {unreadable.map((f) => (
+                <code key={f} className="mr-2 rounded bg-amber-100 px-1">
+                  {f}
+                </code>
+              ))}
+              in <code className="rounded bg-amber-100 px-1">{dataDir}/resumes</code>. They were left untouched. Open the file in a text
+              editor, fix the JSON, or import a backup of it.
+            </p>
+          </div>
+        </div>
+      ) : null}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your resumes</h1>

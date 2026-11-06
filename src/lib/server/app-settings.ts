@@ -30,8 +30,11 @@ export async function getAppSettings(): Promise<AppSettings> {
   }
 }
 
+/** Fields left out of the body keep their current value. */
 export async function saveAppSettings(input: unknown): Promise<AppSettings> {
-  const next = appSettingsSchema.parse(input ?? {})
+  const current = await getAppSettings()
+  const patch = input && typeof input === "object" ? (input as Record<string, unknown>) : {}
+  const next = appSettingsSchema.parse({ ...current, ...patch })
   await writeJsonAtomic(file(), next)
   return next
 }

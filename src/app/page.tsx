@@ -1,16 +1,16 @@
 import { AppHeader } from "@/components/app/app-header"
 import { Dashboard } from "@/components/app/dashboard"
 import { config } from "@/lib/server/config"
-import { getAllResumes } from "@/lib/server/repo"
+import { getAllResumes, getUnreadableResumeFiles } from "@/lib/server/repo"
 
 export const dynamic = "force-dynamic"
 
 export default async function Home() {
-  const resumes = await getAllResumes()
+  const [resumes, unreadable] = await Promise.all([getAllResumes(), getUnreadableResumeFiles()])
   return (
     <div className="min-h-dvh bg-muted/40">
       <AppHeader showLogout={Boolean(config.password)} />
-      <Dashboard resumes={resumes} />
+      <Dashboard resumes={resumes} unreadable={unreadable} dataDir={config.dataDir} />
     </div>
   )
 }
