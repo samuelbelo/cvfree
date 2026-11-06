@@ -5,6 +5,7 @@ import type { DateFormat, Locale, Resume, Section } from "./schema"
 const INTL_LOCALE: Record<Locale, string> = {
   en: "en-US",
   pt: "pt-PT",
+  "pt-BR": "pt-BR",
   es: "es-ES",
   fr: "fr-FR",
   de: "de-DE",

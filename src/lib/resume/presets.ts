@@ -17,9 +17,11 @@ export type SectionPreset = {
   description: string
 }
 
-const t = (en: string, pt: string, es: string, fr: string, de: string): Labels => ({
+/** Brazilian Portuguese falls back to the European title when they are the same. */
+const t = (en: string, pt: string, es: string, fr: string, de: string, ptBR = pt): Labels => ({
   en,
   pt,
+  "pt-BR": ptBR,
   es,
   fr,
   de,
@@ -46,7 +48,7 @@ export const SECTION_PRESETS: SectionPreset[] = [
   {
     type: "education",
     kind: "timeline",
-    titles: t("Education", "Formação Académica", "Educación", "Formation", "Ausbildung"),
+    titles: t("Education", "Formação Académica", "Educación", "Formation", "Ausbildung", "Formação Acadêmica"),
     column: "main",
     single: true,
     fields: { title: "Degree", subtitle: "School", city: "City" },
@@ -55,7 +57,7 @@ export const SECTION_PRESETS: SectionPreset[] = [
   {
     type: "skills",
     kind: "skills",
-    titles: t("Skills", "Competências", "Habilidades", "Compétences", "Kenntnisse"),
+    titles: t("Skills", "Competências", "Habilidades", "Compétences", "Kenntnisse", "Habilidades"),
     column: "side",
     single: false,
     description: "Pick the skills the job listing asks for.",
@@ -142,7 +144,7 @@ export const SECTION_PRESETS: SectionPreset[] = [
   {
     type: "awards",
     kind: "timeline",
-    titles: t("Awards", "Prémios", "Premios", "Distinctions", "Auszeichnungen"),
+    titles: t("Awards", "Prémios", "Premios", "Distinctions", "Auszeichnungen", "Prêmios"),
     column: "main",
     single: true,
     fields: { title: "Award", subtitle: "Awarded by" },
@@ -176,7 +178,7 @@ export const SECTION_PRESETS: SectionPreset[] = [
   {
     type: "customText",
     kind: "text",
-    titles: t("Custom Section", "Secção Personalizada", "Sección Personalizada", "Section personnalisée", "Eigener Abschnitt"),
+    titles: t("Custom Section", "Secção Personalizada", "Sección Personalizada", "Section personnalisée", "Eigener Abschnitt", "Seção Personalizada"),
     column: "main",
     single: false,
     description: "Free text with your own title.",
@@ -184,7 +186,7 @@ export const SECTION_PRESETS: SectionPreset[] = [
   {
     type: "customTimeline",
     kind: "timeline",
-    titles: t("Custom Section", "Secção Personalizada", "Sección Personalizada", "Section personnalisée", "Eigener Abschnitt"),
+    titles: t("Custom Section", "Secção Personalizada", "Sección Personalizada", "Section personnalisée", "Eigener Abschnitt", "Seção Personalizada"),
     column: "main",
     single: false,
     fields: { title: "Title", subtitle: "Subtitle", city: "City" },

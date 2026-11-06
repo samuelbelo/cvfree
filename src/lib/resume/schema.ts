@@ -5,7 +5,8 @@ import { z } from "zod"
  * file on disk, the export format and the editor state are the same shape.
  */
 
-export const LOCALES = ["en", "pt", "es", "fr", "de"] as const
+/** "pt" is European Portuguese, "pt-BR" Brazilian. They differ in section titles and a few words. */
+export const LOCALES = ["en", "pt", "pt-BR", "es", "fr", "de"] as const
 export type Locale = (typeof LOCALES)[number]
 
 export const SECTION_KINDS = ["text", "timeline", "skills", "links", "references"] as const
@@ -172,6 +173,8 @@ export const settingsSchema = z.object({
   headerAlign: z.enum(["left", "center", "right"]).catch("left"),
   dateAlign: z.enum(["inline", "right"]).catch("right"),
   skillsLayout: z.enum(["inline", "columns", "bars"]).catch("columns"),
+  /** Dots are visual only. Text ("Expert") survives copy, paste and resume parsers. */
+  skillLevelStyle: z.enum(["dots", "text"]).catch("dots"),
   skillsColumns: num(1, 4, 2),
   skillsDivider: z.enum(["•", "|", ",", "/"]).catch("•"),
   educationFirst: z.enum(["institution", "degree"]).catch("degree"),

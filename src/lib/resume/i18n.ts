@@ -44,6 +44,20 @@ export const WORDS: Record<Locale, Words> = {
     languageLevels: ["Básico", "Conversação", "Proficiente", "Fluente", "Nativo"],
     details: "Detalhes",
   },
+  "pt-BR": {
+    present: "Atual",
+    page: "Página",
+    of: "de",
+    nationality: "Nacionalidade",
+    placeOfBirth: "Local de nascimento",
+    dateOfBirth: "Data de nascimento",
+    drivingLicense: "Carteira de motorista",
+    address: "Endereço",
+    referencesOnRequest: "Referências disponíveis mediante solicitação",
+    skillLevels: ["Iniciante", "Básico", "Competente", "Experiente", "Especialista"],
+    languageLevels: ["Básico", "Conversação", "Proficiente", "Fluente", "Nativo"],
+    details: "Dados",
+  },
   es: {
     present: "Actualidad",
     page: "Página",
@@ -90,7 +104,8 @@ export const WORDS: Record<Locale, Words> = {
 
 export const LOCALE_NAMES: Record<Locale, string> = {
   en: "English",
-  pt: "Português",
+  pt: "Português (Portugal)",
+  "pt-BR": "Português (Brasil)",
   es: "Español",
   fr: "Français",
   de: "Deutsch",
