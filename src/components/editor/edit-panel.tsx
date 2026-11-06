@@ -139,7 +139,7 @@ function HeaderFooterCard() {
 }
 
 function PersonalCard() {
-  const { personal: p, settings } = useResume()
+  const { personal: p, settings, locale } = useResume()
   const [more, setMore] = useState(Boolean(p.address || p.nationality || p.dateOfBirth || p.placeOfBirth || p.drivingLicense))
   const set = (patch: Partial<Personal>) => updateResume((d) => void Object.assign(d.personal, patch))
   const template = getTemplate(settings.template)
@@ -168,7 +168,7 @@ function PersonalCard() {
             <TextField label="Postal code" value={p.postalCode} onChange={(v) => set({ postalCode: v })} />
             <TextField label="Nationality" value={p.nationality} onChange={(v) => set({ nationality: v })} />
             <TextField label="Place of birth" value={p.placeOfBirth} onChange={(v) => set({ placeOfBirth: v })} />
-            <MonthPicker label="Date of birth" value={p.dateOfBirth} onChange={(v) => set({ dateOfBirth: v })} />
+            <MonthPicker label="Date of birth" value={p.dateOfBirth} locale={locale} format="MM/YYYY" onChange={(v) => set({ dateOfBirth: v })} />
             <TextField label="Driving license" value={p.drivingLicense} placeholder="e.g. B" onChange={(v) => set({ drivingLicense: v })} />
           </>
         ) : null}

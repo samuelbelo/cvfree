@@ -1,14 +1,19 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useId, useMemo, useState } from "react"
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { formatDate } from "@/lib/resume/format"
+import type { DateFormat, Locale } from "@/lib/resume/schema"
 import { cn } from "@/lib/utils"
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+/** Short month names in the resume's language, the same ones the preview prints. */
+function monthNames(locale: Locale): string[] {
+  return Array.from({ length: 12 }, (_, i) => formatDate(`2000-${String(i + 1).padStart(2, "0")}`, "MMM YYYY", locale).replace(/\s*2000$/, ""))
+}
 
 function parse(value: string) {
   const m = /^(\d{4})(?:-(\d{2}))?/.exec(value)
@@ -26,19 +31,25 @@ export function MonthPicker({
   onChange,
   disabled,
   placeholder = "MM / YYYY",
+  locale = "en",
+  format = "MMM YYYY",
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   disabled?: boolean
   placeholder?: string
+  /** Language and date format of the resume, so the field reads like the preview. */
+  locale?: Locale
+  format?: DateFormat
 }) {
   const id = useId()
   const parsed = parse(value)
   const [open, setOpen] = useState(false)
   const [year, setYear] = useState(parsed?.year ?? new Date().getFullYear())
+  const MONTHS = useMemo(() => monthNames(locale), [locale])
 
-  const display = parsed ? (parsed.month ? `${MONTHS[parsed.month - 1]} ${parsed.year}` : String(parsed.year)) : ""
+  const display = parsed ? formatDate(value, format, locale) : ""
 
   return (
     <div className="grid gap-1.5">

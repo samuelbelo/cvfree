@@ -142,7 +142,7 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
             update((s) => {
               Object.assign(s.items[index], patch)
             })
-          const dates = formatRange(item.startDate, item.endDate, item.current, "MM/YYYY", resume.locale)
+          const dates = formatRange(item.startDate, item.endDate, item.current, resume.settings.dateFormat, resume.locale)
           return (
             <ItemCard
               key={item.id}
@@ -156,12 +156,14 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
                 <TextField label={fields.title} value={item.title} onChange={(v) => set({ title: v })} />
                 <TextField label={fields.subtitle} value={item.subtitle} onChange={(v) => set({ subtitle: v })} />
                 <div className="grid grid-cols-2 gap-2">
-                  <MonthPicker label="Start date" value={item.startDate} onChange={(v) => set({ startDate: v })} />
+                  <MonthPicker label="Start date" value={item.startDate} locale={resume.locale} format={resume.settings.dateFormat} onChange={(v) => set({ startDate: v })} />
                   <MonthPicker
                     label="End date"
                     value={item.current ? "" : item.endDate}
                     placeholder={item.current ? WORDS[resume.locale].present : "MM / YYYY"}
                     disabled={item.current}
+                    locale={resume.locale}
+                    format={resume.settings.dateFormat}
                     onChange={(v) => set({ endDate: v, current: false })}
                   />
                 </div>
