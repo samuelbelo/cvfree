@@ -84,8 +84,9 @@ export function reviewResume(resume: Resume): ReviewIssue[] {
 
   const summary = summaryLength(resume)
   if (summary === 0) add("high", "Summary", "Write a short professional summary.")
-  else if (summary < 250) add("medium", "Summary", `Your summary has ${summary} characters. Aim for 400 to 600.`)
-  else if (summary > 750) add("low", "Summary", `Your summary has ${summary} characters. Trim it below 600.`)
+  // Same thresholds as the completeness score: 200 is the floor, 600 a comfortable ceiling.
+  else if (summary < 200) add("medium", "Summary", `Your summary has ${summary} characters. Two to four sentences, 200 to 600 characters, read well.`)
+  else if (summary > 750) add("low", "Summary", `Your summary has ${summary} characters. Trimming it to about 600 keeps it scannable.`)
 
   const exp = find(resume, "experience")
   if (exp?.kind === "timeline") {
@@ -174,7 +175,20 @@ const STOPWORDS = new Set(
 /** Extra filler that postings use a lot but that is never a skill. */
 const FILLER = new Set(
   ("need needs want wants will would build builds building run runs running deliver delivering bring join looking seeking ideal great strong solid hands-on day days senior junior mid " +
-    "maintain maintaining improve improving take taking look looks together other part clear written hybrid remote onsite office app apps").split(
+    "maintain maintaining improve improving take taking look looks together other part clear written hybrid remote onsite office app apps " +
+    // Portuguese
+    "procuramos buscamos vaga vagas requisitos requisito obrigatório obrigatórios obrigatória desejável desejáveis diferencial diferenciais " +
+    "experiência experiências equipe equipa trabalho trabalhar atividades atividade responsabilidades responsabilidade conhecimento conhecimentos " +
+    "habilidades habilidade competências competência formação superior completo completa cursando anos ano sênior sénior pleno júnior " +
+    "benefícios salário remoto híbrido presencial empresa empresas candidato candidata oportunidade perfil atuar atuação área áreas " +
+    "disponibilidade horário contratação regime nível excelente boa bom sólida sólido forte fortes " +
+    // Spanish
+    "buscamos requisitos imprescindible deseable experiencia equipo trabajo responsabilidades conocimientos habilidades formación años " +
+    "beneficios salario remoto híbrido presencial empresa candidato oportunidad perfil nivel excelente " +
+    // French
+    "recherchons poste profil missions compétences expérience équipe travail formation années requis souhaité entreprise candidat télétravail " +
+    // German
+    "suchen stelle aufgaben anforderungen erfahrung kenntnisse team arbeit ausbildung jahre unternehmen bewerber wünschenswert").split(
     " "
   )
 )

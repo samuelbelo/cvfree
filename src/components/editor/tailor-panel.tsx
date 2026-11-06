@@ -124,7 +124,12 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       {report ? (
         <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Keyword match</h3>
+            <div>
+              <h3 className="font-semibold">Keyword coverage</h3>
+              <p className="text-xs text-muted-foreground">
+                Share of the posting&apos;s terms that appear somewhere in your resume. A word count, not an ATS score or a hiring prediction.
+              </p>
+            </div>
             <span className="text-2xl font-semibold tabular-nums" style={{ color: report.score >= 60 ? "#059669" : report.score >= 35 ? "#d97706" : "#e11d48" }}>
               {report.score}%
             </span>
@@ -134,7 +139,9 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
           </div>
           {report.missing.length ? (
             <div className="grid gap-1.5">
-              <div className="text-xs text-muted-foreground">Missing from your resume. Click to add as a skill (only if you really have it):</div>
+              <div className="text-xs text-muted-foreground">
+                Not found in your resume. Click one to add it as a skill, only if you really have it. Better still, mention it where you used it.
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {report.missing.map((k) => (
                   <button key={k} type="button" onClick={() => addSkill(k)}>
