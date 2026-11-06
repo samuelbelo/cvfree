@@ -18,8 +18,12 @@ RUN pnpm build
 
 # ---- runtime --------------------------------------------------------------
 FROM node:24-alpine AS runtime
-# Chromium renders the PDFs. tini reaps its child processes.
-RUN apk add --no-cache chromium nss freetype harfbuzz ttf-freefont font-noto-emoji tini wget
+# Chromium renders the PDFs. tini reaps its child processes. The Noto fonts
+# are the fallback for scripts the bundled fonts do not cover: CJK, Arabic,
+# Cyrillic and Greek beyond Inter, emoji. Names in those scripts would
+# otherwise print as boxes.
+RUN apk add --no-cache chromium nss freetype harfbuzz ttf-freefont \
+    font-noto font-noto-cjk font-noto-arabic font-noto-emoji tini wget
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
