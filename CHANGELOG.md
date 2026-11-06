@@ -1,3 +1,21 @@
+## [0.3.0](https://github.com/samuelbelo/cvfree/compare/v0.2.0...v0.3.0) (2026-11-06)
+
+### Features
+
+* collapse or expand every editor section at once ([d7f57f0](https://github.com/samuelbelo/cvfree/commit/d7f57f01de8ed9432d2e0da4d9d488d072d7e1cd))
+* conferences and affiliations sections ([ba15faa](https://github.com/samuelbelo/cvfree/commit/ba15faa331f36097f5a8c0bb97c3c957649cdf39))
+* cover letters made from a resume, with PDF, Word and text export and an optional AI draft ([02ee790](https://github.com/samuelbelo/cvfree/commit/02ee790ec1ec1f4a02759259f7d18316a483c5a3))
+* public read-only link for a resume, with PDF and Word download ([dead79e](https://github.com/samuelbelo/cvfree/commit/dead79ef4dc2b5fcccfe6aef54c3b58c79ad0620))
+
+### Fixes
+
+* pin the compose project name so the data volume has a stable name ([6127501](https://github.com/samuelbelo/cvfree/commit/6127501e3a8969b6040545dc7b4d774627f1588f))
+
+### Documentation
+
+* cover letters in the README ([64a0ffe](https://github.com/samuelbelo/cvfree/commit/64a0ffefc3a340afb2d5c9cb4a19bd5f3e3e3d22))
+* describe the public link, backup and restore with the right volume and ownership ([9cdb603](https://github.com/samuelbelo/cvfree/commit/9cdb603a12f00f799c7aa831fcdd448fa42650d0))
+
 ## [0.2.0](https://github.com/samuelbelo/cvfree/compare/v0.1.0...v0.2.0) (2026-11-06)
 
 ### Features
