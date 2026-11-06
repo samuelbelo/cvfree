@@ -34,13 +34,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Type check
-        run: pnpm exec tsc --noEmit
-
+      # The build comes first: it generates the route and layout types that the type check needs.
       - name: Build
         run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
 
   docker:
     name: Docker image builds

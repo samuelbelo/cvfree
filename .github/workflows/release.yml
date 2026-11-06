@@ -38,10 +38,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm exec tsc --noEmit
+      # Build first: it generates the route and layout types the type check needs.
       - run: pnpm build
         env:
           NEXT_TELEMETRY_DISABLED: 1
+      - run: pnpm exec tsc --noEmit
 
   release:
     name: Version, changelog and GitHub release
