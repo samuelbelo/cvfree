@@ -1,0 +1,120 @@
+name: Release
+
+# Every push to main that contains a feat or fix commit becomes a release:
+# semantic-release works out the version from the commit messages
+# (Conventional Commits), writes CHANGELOG.md, bumps package.json, tags the
+# commit and publishes the GitHub release. The Docker image is then built from
+# that tag and pushed with the version, the minor and latest.
+#
+# A release made with GITHUB_TOKEN does not trigger other workflows, so the
+# image is built here, in the same run, instead of on the "release" event.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
+jobs:
+  check:
+    name: Lint, types and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+  release:
+    name: Version, changelog and GitHub release
+    needs: check
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.semantic.outputs.published }}
+      version: ${{ steps.semantic.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: semantic-release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          pnpm exec semantic-release | tee release.log
+          VERSION="$(sed -nE 's/.*Published release ([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' release.log | tail -1)"
+          if [ -n "$VERSION" ]; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "Released v$VERSION" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "No release: no feat or fix commits since the last tag." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  image:
+    name: Build and push the Docker image
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The tag points at the release commit, which carries the bumped package.json.
+          ref: v${{ needs.release.outputs.version }}
+
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=${{ needs.release.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ needs.release.outputs.version }}
+            type=raw,value=latest
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
