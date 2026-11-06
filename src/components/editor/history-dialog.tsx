@@ -83,7 +83,7 @@ export function HistoryDialog({
             No earlier versions yet. The first one appears after the next save.
           </div>
         ) : (
-          <ul className="grid max-h-[50vh] gap-1.5 overflow-y-auto">
+          <ul className="grid max-h-[50vh] grid-cols-[minmax(0,1fr)] gap-1.5 overflow-y-auto">
             {items.map((s) => (
               <li key={s.at} className="flex items-center gap-3 rounded-lg border px-3 py-2 text-sm">
                 <div className="min-w-0 flex-1">
