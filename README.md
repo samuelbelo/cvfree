@@ -20,6 +20,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Optional AI** review and tailoring with any OpenAI-compatible API, including a local Ollama.
 - **Resume language** for section titles and dates: English, Portuguese, Spanish, French, German.
 - **Public link.** One click gives a resume a read-only address you can send to a recruiter, with PDF and Word download. Revoke it any time.
+- **Cover letters.** One per application, created from a resume so name, contact details, fonts and color already match. Greeting, date and sign-off follow the letter's language. PDF, Word and text export, and an optional AI first draft from the posting.
 - **Undo and redo**, autosave, optional password protection.
 
 ## A quick tour
@@ -73,6 +74,12 @@ The editor works on small screens too. Switch between the form and the preview w
 The Share button in the editor gives the resume a read-only address like `https://cv.example.com/s/gP-ywzw2ydBe2QhvztNbk6zV`. Anyone with the link sees the latest saved version and can download the PDF or the Word file. They cannot edit it, cannot see your other resumes, and the page asks search engines not to index it. Revoke the link and the address stops working at once. A duplicate or an imported backup never carries the link along.
 
 ![Share dialog with the public link](docs/screenshots/share.png)
+
+### Cover letters
+
+"New cover letter" on the dashboard takes the name, contact details and style from one of your resumes. Fill in the company, the position and, if you know it, the hiring manager: the letter writes the greeting, the date and the sign-off in its language, and you write the three or four paragraphs that matter. With an AI provider configured, "Write with AI" drafts them from the posting and your resume, using only what the resume says.
+
+![Cover letter editor with the live preview](docs/screenshots/cover-letter.png)
 
 ### Settings
 
