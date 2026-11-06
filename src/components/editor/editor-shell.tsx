@@ -60,23 +60,40 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
   const [mobilePreview, setMobilePreview] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const savedRevision = useRef(0)
+  // The updatedAt this editor last saw. The server refuses a save based on an older one.
+  const baseUpdatedAt = useRef(initial.updatedAt)
 
   useEffect(() => {
     useEditor.getState().load(initial)
+    baseUpdatedAt.current = initial.updatedAt
     return () => useEditor.setState({ resume: null })
   }, [initial])
 
-  const save = useCallback(async () => {
-    const { resume: current, revision } = useEditor.getState()
-    if (!current || revision === savedRevision.current) return
+  const save = useCallback(async (opts: { unloading?: boolean } = {}) => {
+    const { resume: current, revision, saveState } = useEditor.getState()
+    if (!current || revision === savedRevision.current || saveState === "conflict") return
     useEditor.getState().setSaveState("saving")
+    const body = JSON.stringify({ ...current, baseUpdatedAt: baseUpdatedAt.current })
     try {
       const res = await fetch(`/api/resumes/${current.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(current),
+        body,
+        // A keepalive request survives the tab closing, but only up to 64 KB.
+        keepalive: opts.unloading && body.length < 60_000,
       })
+      if (res.status === 409) {
+        useEditor.getState().setSaveState("conflict")
+        toast.error("This resume was changed in another tab or window. Reload to see it. Your edits here will not be saved.", {
+          id: "conflict",
+          duration: Infinity,
+          action: { label: "Reload", onClick: () => window.location.reload() },
+        })
+        return
+      }
       if (!res.ok) throw new Error(String(res.status))
+      const data = (await res.json()) as { updatedAt?: string }
+      if (data.updatedAt) baseUpdatedAt.current = data.updatedAt
       savedRevision.current = revision
       useEditor.getState().setSaveState(useEditor.getState().revision === revision ? "saved" : "saving")
     } catch {
@@ -87,10 +104,10 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
   // Autosave: every change restarts a short timer.
   useEffect(() => {
     return useEditor.subscribe((state, prev) => {
-      if (state.revision === prev.revision || !state.resume) return
+      if (state.revision === prev.revision || !state.resume || state.saveState === "conflict") return
       useEditor.getState().setSaveState("saving")
       if (timer.current) clearTimeout(timer.current)
-      timer.current = setTimeout(save, SAVE_DELAY)
+      timer.current = setTimeout(() => void save(), SAVE_DELAY)
     })
   }, [save])
 
@@ -99,17 +116,30 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
     await save()
   }, [save])
 
-  // Warn before closing the tab with unsaved changes.
+  // Closing or hiding the tab: send what is pending right away, and warn if it may not make it.
   useEffect(() => {
+    const pending = () => useEditor.getState().revision !== savedRevision.current && useEditor.getState().saveState !== "conflict"
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (useEditor.getState().saveState === "saving") {
-        void flush()
-        e.preventDefault()
+      if (!pending()) return
+      if (timer.current) clearTimeout(timer.current)
+      void save({ unloading: true })
+      e.preventDefault()
+    }
+    const onHide = () => {
+      if (document.visibilityState === "hidden" && pending()) {
+        if (timer.current) clearTimeout(timer.current)
+        void save({ unloading: true })
       }
     }
     window.addEventListener("beforeunload", onBeforeUnload)
-    return () => window.removeEventListener("beforeunload", onBeforeUnload)
-  }, [flush])
+    window.addEventListener("pagehide", onHide)
+    document.addEventListener("visibilitychange", onHide)
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload)
+      window.removeEventListener("pagehide", onHide)
+      document.removeEventListener("visibilitychange", onHide)
+    }
+  }, [save])
 
   // Undo and redo outside text fields (text editors keep their own history).
   useEffect(() => {
@@ -281,10 +311,13 @@ function SaveIndicator({ state }: { state: string }) {
       ? [<Loader2 key="i" className="size-3.5 animate-spin" />, "Saving", "text-muted-foreground"]
       : state === "error"
         ? [<CloudOff key="i" className="size-3.5" />, "Not saved", "text-destructive"]
-        : [<Check key="i" className="size-3.5" />, "Saved", "text-muted-foreground"]
+        : state === "conflict"
+          ? [<CloudOff key="i" className="size-3.5" />, "Changed elsewhere", "text-destructive"]
+          : [<Check key="i" className="size-3.5" />, "Saved", "text-muted-foreground"]
+  const alert = state === "error" || state === "conflict"
   return (
     <span className={`flex items-center gap-1 px-1.5 text-xs sm:px-2 ${tone}`} title={text} role="status">
-      {icon} <span className={state === "error" ? "" : "hidden sm:inline"}>{text}</span>
+      {icon} <span className={alert ? "" : "hidden sm:inline"}>{text}</span>
     </span>
   )
 }

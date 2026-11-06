@@ -11,7 +11,8 @@ import type { Resume } from "@/lib/resume/schema"
  * Autosave subscribes to the same store.
  */
 
-type SaveState = "idle" | "saving" | "saved" | "error"
+/** "conflict": the file on the server changed under us (another tab). Saving stops until a reload. */
+type SaveState = "idle" | "saving" | "saved" | "error" | "conflict"
 
 type EditorState = {
   resume: Resume | null

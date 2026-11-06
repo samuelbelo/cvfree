@@ -21,8 +21,17 @@ export async function PUT(request: Request, { params }: Ctx) {
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 })
   }
+  // The editor sends the updatedAt it last saw. A different value on disk means
+  // another tab or window saved in between, so this write would erase its work.
+  const { baseUpdatedAt, ...resume } = body as { baseUpdatedAt?: unknown }
+  if (typeof baseUpdatedAt === "string" && baseUpdatedAt !== existing.updatedAt) {
+    return NextResponse.json(
+      { error: "This resume was changed in another tab or window.", updatedAt: existing.updatedAt },
+      { status: 409 }
+    )
+  }
   const saved = await saveResume(
-    normalizeResume({ ...body, id, createdAt: existing.createdAt })
+    normalizeResume({ ...resume, id, createdAt: existing.createdAt })
   )
   return NextResponse.json({ updatedAt: saved.updatedAt })
 }
