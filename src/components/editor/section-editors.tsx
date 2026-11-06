@@ -47,11 +47,17 @@ export function SectionBodyEditor({ section }: { section: Section }) {
 
 function TextSectionEditor({ section }: { section: SectionOf<"text"> }) {
   const update = useSectionUpdater<"text">(section.id)
+  const resume = useResume()
   const preset = getPreset(section.type)
   const length = section.html.replace(/<[^>]+>/g, "").length
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
-      <RichText value={section.html} onChange={(html) => update((s) => void (s.html = html))} placeholder={preset.description} />
+      <RichText
+        value={section.html}
+        onChange={(html) => update((s) => void (s.html = html))}
+        placeholder={preset.description}
+        help={section.type === "summary" ? { kind: "summary", locale: resume.locale } : undefined}
+      />
       {section.type === "summary" ? (
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Recruiter tip: 400 to 600 characters reads best.</span>
@@ -183,6 +189,7 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
                   value={item.description}
                   onChange={(html) => set({ description: html })}
                   placeholder="Start bullets with a verb and add numbers: Cut load time by 40% by..."
+                  help={{ kind: "bullet", locale: resume.locale }}
                 />
               </div>
             </ItemCard>

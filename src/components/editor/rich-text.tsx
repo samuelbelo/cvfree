@@ -6,6 +6,7 @@ import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import {
   AlignCenter,
+  WandSparkles,
   AlignJustify,
   AlignLeft,
   AlignRight,
@@ -21,13 +22,19 @@ import {
 
 import { PromptDialog } from "@/components/app/prompt-dialog"
 import { hrefFor } from "@/lib/resume/format"
+import type { PhraseKind } from "@/lib/resume/phrases"
+import type { Locale } from "@/lib/resume/schema"
 import { cn } from "@/lib/utils"
+
+import { PhraseDialog } from "./phrase-dialog"
 
 type Props = {
   value: string
   onChange: (html: string) => void
   placeholder?: string
   minHeight?: number
+  /** Shows the "Help me write" button with starters of this kind. */
+  help?: { kind: PhraseKind; locale: Locale }
 }
 
 function Btn({ icon: Icon, active, onClick, label }: { icon: LucideIcon; active?: boolean; onClick: () => void; label: string }) {
@@ -50,7 +57,7 @@ function Btn({ icon: Icon, active, onClick, label }: { icon: LucideIcon; active?
 }
 
 /** Small rich text editor. Stores HTML, which templates render as is. */
-export function RichText({ value, onChange, placeholder, minHeight = 110 }: Props) {
+export function RichText({ value, onChange, placeholder, minHeight = 110, help }: Props) {
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
@@ -102,7 +109,22 @@ export function RichText({ value, onChange, placeholder, minHeight = 110 }: Prop
     : null
 
   const [linkOpen, setLinkOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const chain = () => editor!.chain().focus()
+
+  // A summary starter becomes a paragraph. A bullet starter joins the list at the end, or starts one.
+  const insertPhrase = (text: string) => {
+    if (!editor) return
+    const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    const c = editor.chain().focus("end")
+    if (help?.kind === "bullet") {
+      if (editor.isEmpty) c.insertContent(`<ul><li><p>${escaped}</p></li></ul>`).run()
+      else if (editor.state.doc.lastChild?.type.name === "bulletList") c.insertContent({ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text }] }] }).run()
+      else c.insertContent(`<ul><li><p>${escaped}</p></li></ul>`).run()
+    } else {
+      c.insertContent(editor.isEmpty ? `<p>${escaped}</p>` : `<p>${escaped}</p>`).run()
+    }
+  }
 
   return (
     <div className="rounded-lg border bg-muted/40 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30">
@@ -131,12 +153,23 @@ export function RichText({ value, onChange, placeholder, minHeight = 110 }: Prop
                 setLinkOpen(true)
               }}
             />
+            {help ? (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setHelpOpen(true)}
+                className="ml-auto flex h-7 items-center gap-1 rounded-md px-2 text-xs text-primary hover:bg-background"
+              >
+                <WandSparkles className="size-3.5" /> Help me write
+              </button>
+            ) : null}
           </>
         ) : (
           <div className="h-7" />
         )}
       </div>
       <EditorContent editor={editor} />
+      {help ? <PhraseDialog open={helpOpen} onOpenChange={setHelpOpen} kind={help.kind} locale={help.locale} onPick={insertPhrase} /> : null}
       <PromptDialog
         open={linkOpen}
         title="Add link"
