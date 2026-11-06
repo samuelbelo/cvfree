@@ -143,7 +143,9 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
       const res = await fetch(`/api/resumes/${resume.id}/export?format=${format}`)
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `Export failed (${res.status})`)
       const blob = await res.blob()
-      const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? `resume.${format}`
+      const disposition = res.headers.get("Content-Disposition") ?? ""
+      const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1]
+      const name = (utf8 ? decodeURIComponent(utf8) : /filename="([^"]+)"/.exec(disposition)?.[1]) ?? `resume.${format}`
       const a = document.createElement("a")
       a.href = URL.createObjectURL(blob)
       a.download = name
@@ -170,24 +172,10 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
         <input
           value={resume.title}
           onChange={(e) => updateResume((d) => void (d.title = e.target.value))}
-          className="hidden w-40 min-w-0 truncate rounded-md bg-transparent px-2 py-1 text-sm font-medium outline-none hover:bg-muted focus:bg-muted sm:block lg:w-64"
+          className="w-24 min-w-0 flex-1 truncate rounded-md bg-transparent px-2 py-1 text-sm font-medium outline-none hover:bg-muted focus:bg-muted sm:flex-none md:w-40 lg:w-64"
           aria-label="Resume name"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="sm" className="text-muted-foreground" />}>
-            {LOCALE_NAMES[resume.locale]} <ChevronDown />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>Resume language</DropdownMenuLabel>
-              {LOCALES.map((l) => (
-                <DropdownMenuItem key={l} onClick={() => updateResume((d) => void (d.locale = l as Locale))}>
-                  {resume.locale === l ? <Check /> : <span className="size-4" />} {LOCALE_NAMES[l]}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LanguageMenu locale={resume.locale} className="hidden sm:inline-flex" />
 
         <nav className="mx-auto hidden items-center rounded-lg bg-muted p-1 md:flex">
           {TABS.map((t) => (
@@ -205,7 +193,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 md:ml-0">
+        <div className="flex shrink-0 items-center gap-1 md:ml-0">
           <SaveIndicator state={saveState} />
           <Button variant="ghost" size="icon" disabled={!canUndo} onClick={() => useEditor.getState().undo()} aria-label="Undo">
             <Undo2 />
@@ -214,8 +202,8 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
             <Redo2 />
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button className="ml-1" />}>
-              <Download /> Download <ChevronDown />
+            <DropdownMenuTrigger render={<Button className="ml-1" aria-label="Download" />}>
+              <Download /> <span className="hidden sm:inline">Download</span> <ChevronDown className="hidden sm:block" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem onClick={() => download("pdf")}>
@@ -248,6 +236,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
         <Button size="sm" variant={mobilePreview ? "secondary" : "ghost"} onClick={() => setMobilePreview(true)}>
           Preview
         </Button>
+        <LanguageMenu locale={resume.locale} className="ml-auto sm:hidden" />
       </nav>
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(380px,1fr)_minmax(0,1fr)]">
@@ -259,28 +248,43 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
             {tab === "tailor" ? <TailorPanel aiEnabled={aiEnabled} onBeforeLeave={flush} /> : null}
           </div>
         </ScrollArea>
-        <Preview resume={resume} className={cn("min-h-0 overflow-y-auto border-l bg-muted/60", !mobilePreview && "hidden md:block")} />
+        <Preview resume={resume} className={cn("min-h-0 border-l bg-muted/60", mobilePreview ? "flex" : "hidden md:flex")} />
       </div>
     </div>
   )
 }
 
-function SaveIndicator({ state }: { state: string }) {
-  if (state === "saving")
-    return (
-      <span className="hidden items-center gap-1 px-2 text-xs text-muted-foreground sm:flex">
-        <Loader2 className="size-3 animate-spin" /> Saving
-      </span>
-    )
-  if (state === "error")
-    return (
-      <span className="flex items-center gap-1 px-2 text-xs text-destructive">
-        <CloudOff className="size-3.5" /> Not saved
-      </span>
-    )
+function LanguageMenu({ locale, className }: { locale: Locale; className?: string }) {
   return (
-    <span className="hidden items-center gap-1 px-2 text-xs text-muted-foreground sm:flex">
-      <Check className="size-3.5" /> Saved
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="sm" className={cn("text-muted-foreground", className)} />}>
+        {LOCALE_NAMES[locale]} <ChevronDown />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Resume language</DropdownMenuLabel>
+          {LOCALES.map((l) => (
+            <DropdownMenuItem key={l} onClick={() => updateResume((d) => void (d.locale = l as Locale))}>
+              {locale === l ? <Check /> : <span className="size-4" />} {LOCALE_NAMES[l]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+/** Always visible. On narrow screens only the icon shows, with the word in the tooltip. */
+function SaveIndicator({ state }: { state: string }) {
+  const [icon, text, tone] =
+    state === "saving"
+      ? [<Loader2 key="i" className="size-3.5 animate-spin" />, "Saving", "text-muted-foreground"]
+      : state === "error"
+        ? [<CloudOff key="i" className="size-3.5" />, "Not saved", "text-destructive"]
+        : [<Check key="i" className="size-3.5" />, "Saved", "text-muted-foreground"]
+  return (
+    <span className={`flex items-center gap-1 px-1.5 text-xs sm:px-2 ${tone}`} title={text} role="status">
+      {icon} <span className={state === "error" ? "" : "hidden sm:inline"}>{text}</span>
     </span>
   )
 }

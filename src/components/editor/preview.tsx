@@ -4,9 +4,10 @@ import { useLayoutEffect, useRef, useState } from "react"
 import { Minus, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { WORDS } from "@/lib/resume/i18n"
 import type { Resume } from "@/lib/resume/schema"
-import { ResumeDocument } from "@/templates/resume-document"
+import { chromeEdge, ResumeDocument } from "@/templates/resume-document"
 import { MM_TO_PX, PAGE_SIZE } from "@/templates/style"
 
 /** Track an element's size. */
@@ -60,48 +61,39 @@ export function Preview({ resume, className }: { resume: Resume; className?: str
   const pages = Math.max(1, Math.ceil((doc.height - 2) / pageH))
 
   return (
-    // The scrollbar gutter is always reserved. Otherwise the scrollbar showing up
-    // narrows the frame, the page shrinks, the scrollbar goes away, and it loops.
-    <div ref={frameRef} className={className} style={{ scrollbarGutter: "stable" }}>
-      <div className="mx-auto py-6" style={{ width: pageW * scale }}>
-        <div className="relative" style={{ height: Math.max(doc.height, pageH) * scale }}>
-          <div
-            className="absolute top-0 left-0 origin-top-left overflow-hidden rounded-sm bg-white shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
-            style={{ transform: `scale(${scale})`, width: pageW }}
-          >
-            <div ref={docRef}>
-              <ResumeDocument resume={resume} />
+    <div className={cn("flex-col", className)}>
+      {/* The scrollbar gutter is always reserved. Otherwise the scrollbar showing up
+          narrows the frame, the page shrinks, the scrollbar goes away, and it loops. */}
+      <div ref={frameRef} className="min-h-0 flex-1 overflow-y-auto" style={{ scrollbarGutter: "stable" }}>
+        <div className="mx-auto py-6" style={{ width: pageW * scale }}>
+          <div className="relative" style={{ height: Math.max(doc.height, pageH) * scale }}>
+            <div
+              className="absolute top-0 left-0 origin-top-left overflow-hidden rounded-sm bg-white shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
+              style={{ transform: `scale(${scale})`, width: pageW }}
+            >
+              <div ref={docRef}>
+                <ResumeDocument resume={resume} />
+              </div>
+              {Array.from({ length: pages }, (_, i) => (
+                <PageChrome key={i} resume={resume} index={i} total={pages} pageH={pageH} />
+              ))}
             </div>
-            {Array.from({ length: pages }, (_, i) => (
-              <PageChrome key={i} resume={resume} index={i} total={pages} pageH={pageH} />
-            ))}
           </div>
         </div>
       </div>
-      <div className="sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-1 rounded-full bg-foreground/90 px-2 py-1 text-background shadow-lg">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-7 rounded-full text-background hover:bg-background/15 hover:text-background"
-          onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))}
-          aria-label="Zoom out"
-        >
+      {/* A toolbar of its own, so it never covers the page. */}
+      <div className="flex shrink-0 items-center justify-center gap-1 border-t bg-background px-2 py-1.5">
+        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))} aria-label="Zoom out">
           <Minus />
         </Button>
         <button type="button" className="min-w-12 text-xs tabular-nums" onClick={() => setZoom(1)} title="Reset zoom">
           {Math.round(zoom * 100)}%
         </button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="size-7 rounded-full text-background hover:bg-background/15 hover:text-background"
-          onClick={() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)))}
-          aria-label="Zoom in"
-        >
+        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)))} aria-label="Zoom in">
           <Plus />
         </Button>
-        <span className="mx-1 h-4 w-px bg-background/30" />
-        <span className="px-2 text-xs tabular-nums">
+        <span className="mx-1 h-4 w-px bg-border" />
+        <span className="px-2 text-xs text-muted-foreground tabular-nums">
           {pages} {pages === 1 ? "page" : "pages"}
         </span>
       </div>
@@ -112,9 +104,9 @@ export function Preview({ resume, className }: { resume: Resume; className?: str
 function PageChrome({ resume, index, total, pageH }: { resume: Resume; index: number; total: number; pageH: number }) {
   const s = resume.settings
   const label = pageLabel(resume, index + 1, total)
-  const edge = Math.max(10, (s.page.marginY * MM_TO_PX) / 2.4)
+  const edge = chromeEdge(s.page.marginY)
   const top = index * pageH
-  const style = "pointer-events-none absolute right-0 left-0 text-[7.5pt] text-[#737980]"
+  const style = "pointer-events-none absolute right-0 left-0 text-[7.5pt] leading-3 text-[#737980]"
   const pad = { paddingLeft: `${s.page.marginX}mm`, paddingRight: `${s.page.marginX}mm` }
   return (
     <>
