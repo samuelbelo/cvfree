@@ -14,7 +14,8 @@ services:
     container_name: cvfree
     restart: unless-stopped
     ports:
-      - "${CVFREE_PORT:-3000}:3000"
+      # With the https profile set CVFREE_BIND=127.0.0.1, so only Caddy is reachable from outside.
+      - "${CVFREE_BIND:-0.0.0.0}:${CVFREE_PORT:-3000}:3000"
     environment:
       CVFREE_PASSWORD: ${CVFREE_PASSWORD:-}
       AI_BASE_URL: ${AI_BASE_URL:-}

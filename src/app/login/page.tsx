@@ -24,10 +24,12 @@ function LoginForm() {
       body: JSON.stringify({ password }),
     })
     if (res.ok) {
-      const next = params.get("next")
-      window.location.href = next?.startsWith("/") ? next : "/"
+      const next = params.get("next") ?? ""
+      // Only a path on this site. "//host" and "/\host" would leave it.
+      window.location.href = /^\/(?![/\\])/.test(next) ? next : "/"
     } else {
-      setError("Wrong password")
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+      setError(data.error || "Wrong password")
       setLoading(false)
     }
   }
