@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid"
 
 import { getPreset } from "./presets"
+import { sanitizeHtml } from "./sanitize"
 import {
   personalSchema,
   resumeSchema,
@@ -206,8 +207,17 @@ export function normalizeResume(raw: unknown): Resume {
     sections: Array.isArray(input.sections)
       ? input.sections.flatMap((s) => {
           const parsed = sectionSchema.safeParse(s)
-          return parsed.success ? [parsed.data] : []
+          return parsed.success ? [sanitizeSection(parsed.data)] : []
         })
       : [],
   })
+}
+
+/** Rich text is stored as HTML. Only the editor's own markup is kept. */
+function sanitizeSection(section: Section): Section {
+  if (section.kind === "text") return { ...section, html: sanitizeHtml(section.html) }
+  if (section.kind === "timeline") {
+    return { ...section, items: section.items.map((i) => ({ ...i, description: sanitizeHtml(i.description) })) }
+  }
+  return section
 }

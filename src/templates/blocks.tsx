@@ -1,7 +1,8 @@
 import type { ReactNode } from "react"
 import { Globe, Link2, Mail, MapPin, Phone } from "lucide-react"
 
-import { formatDate, formatRange, fullName, hrefFor, isHtmlEmpty, prettyUrl, sectionTitle } from "@/lib/resume/format"
+import { formatDate, formatRange, fullName, hrefFor, isEmail, isHtmlEmpty, isPhone, isUrl, prettyUrl, sectionTitle } from "@/lib/resume/format"
+import { sanitizeHtml } from "@/lib/resume/sanitize"
 import { WORDS } from "@/lib/resume/i18n"
 import { getPreset } from "@/lib/resume/presets"
 import type { Resume, Section, SectionOf, TimelineItem } from "@/lib/resume/schema"
@@ -86,10 +87,11 @@ export function contactItems(ctx: Ctx): ContactItem[] {
   const items: ContactItem[] = []
   const place = [p.city, p.country].filter(Boolean).join(", ")
   if (place) items.push({ key: "place", icon: <MapPin />, text: place })
-  if (p.email) items.push({ key: "email", icon: <Mail />, text: p.email, href: `mailto:${p.email}` })
-  if (p.phone) items.push({ key: "phone", icon: <Phone />, text: p.phone, href: `tel:${p.phone.replace(/\s/g, "")}` })
-  if (p.website) items.push({ key: "web", icon: <Globe />, text: prettyUrl(p.website), href: hrefFor(p.website) })
-  if (p.linkedin) items.push({ key: "linkedin", icon: <Link2 />, text: prettyUrl(p.linkedin), href: hrefFor(p.linkedin) })
+  // Values that do not look like an address are shown as text, never as a broken link.
+  if (p.email) items.push({ key: "email", icon: <Mail />, text: p.email, href: isEmail(p.email) ? `mailto:${p.email}` : undefined })
+  if (p.phone) items.push({ key: "phone", icon: <Phone />, text: p.phone, href: isPhone(p.phone) ? `tel:${p.phone.replace(/[\s().-]/g, "")}` : undefined })
+  if (p.website) items.push({ key: "web", icon: <Globe />, text: prettyUrl(p.website), href: isUrl(p.website) ? hrefFor(p.website) : undefined })
+  if (p.linkedin) items.push({ key: "linkedin", icon: <Link2 />, text: prettyUrl(p.linkedin), href: isUrl(p.linkedin) ? hrefFor(p.linkedin) : undefined })
   return items
 }
 
@@ -212,7 +214,9 @@ export function SectionBody({ ctx, section, opts }: { ctx: Ctx; section: Section
 
 export function Rich({ ctx, html }: { ctx: Ctx; html: string }) {
   if (isHtmlEmpty(html)) return null
-  const content = ctx.links ? html : html.replace(/<\/?a(\s[^>]*)?>/gi, "")
+  // Stored HTML is already clean. Sanitizing again costs little and protects old files.
+  const safe = sanitizeHtml(html)
+  const content = ctx.links ? safe : safe.replace(/<\/?a(\s[^>]*)?>/gi, "")
   return <div className="cv-rich" dangerouslySetInnerHTML={{ __html: content }} />
 }
 

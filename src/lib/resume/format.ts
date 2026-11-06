@@ -80,3 +80,15 @@ export function hrefFor(url: string): string {
   if (/^(https?:|mailto:|tel:)/i.test(url)) return url
   return `https://${url}`
 }
+
+export const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+
+/** Digits with the usual separators, at least 6 of them. */
+export const isPhone = (value: string) => /^\+?[\d\s().-]{6,}$/.test(value.trim()) && (value.match(/\d/g) ?? []).length >= 6
+
+/** Something with a dot and no spaces, or an explicit http(s) scheme. */
+export const isUrl = (value: string) => {
+  const v = value.trim()
+  if (/^https?:\/\/\S+$/i.test(v)) return true
+  return /^[^\s/:]+\.[a-z0-9-]{2,}(\/\S*)?$/i.test(v) && !/^[a-z][a-z0-9+.-]*:/i.test(v)
+}
