@@ -1,16 +1,19 @@
 import { headers } from "next/headers"
 
 import { AppHeader } from "@/components/app/app-header"
+import { BackupPanel } from "@/components/app/backup-panel"
 import { McpSetup } from "@/components/app/mcp-setup"
 import { SettingsForm } from "@/components/app/settings-form"
 import { getAppSettings } from "@/lib/server/app-settings"
 import { aiEnabled, config } from "@/lib/server/config"
+import { listLetters } from "@/lib/server/letters"
 import { findChrome } from "@/lib/server/pdf"
+import { listResumes } from "@/lib/server/repo"
 
 export const dynamic = "force-dynamic"
 
 export default async function SettingsPage() {
-  const settings = await getAppSettings()
+  const [settings, resumes, letters] = await Promise.all([getAppSettings(), listResumes(), listLetters()])
   const chrome = findChrome()
   const h = await headers()
   const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim() || "http"
@@ -55,6 +58,11 @@ export default async function SettingsPage() {
         </div>
 
         <SettingsForm initial={settings} />
+
+        <section className="rounded-xl border bg-card shadow-xs">
+          <h2 className="border-b px-5 py-3 font-semibold">Backup</h2>
+          <BackupPanel resumes={resumes.length} letters={letters.length} />
+        </section>
 
         <section className="rounded-xl border bg-card shadow-xs">
           <h2 className="border-b px-5 py-3 font-semibold">Instance</h2>
