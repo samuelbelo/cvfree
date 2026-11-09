@@ -24,6 +24,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Help me write.** Sentence starters for the summary and for job bullets, by role family, in English and Portuguese. Every name and number is a placeholder in brackets: the shape is given, the facts are yours.
 - **Version history.** A copy is kept before each save (at most one every ten minutes, thirty kept). Restore any of them from the Download menu.
 - **Combine with.** Merge two resumes into a new one: summary, skills and languages are merged, jobs and education appended, originals untouched.
+- **MCP server.** Connect Claude Code, Claude Desktop, Cursor or your own agent to the instance and let it list, review, edit and export your resumes and cover letters, with the same checks as the editor.
 - **Undo and redo**, autosave, optional password protection.
 
 ## A quick tour
@@ -86,9 +87,23 @@ The Share button in the editor gives the resume a read-only address like `https:
 
 ### Settings
 
-Defaults for new resumes (template, language and color), and a status panel that shows where data is stored, which browser renders PDFs, and whether AI and the password are on.
+Defaults for new resumes (template, language and color), and a status panel that shows where data is stored, which browser renders PDFs, and whether AI, the password and the MCP endpoint are on.
 
 ![Settings page](docs/screenshots/settings.png)
+
+### Connect an AI assistant (MCP)
+
+The app is also an [MCP](https://modelcontextprotocol.io) server at `/mcp`. An assistant connected to it gets 29 tools: list and read resumes, review them, compare them with a job posting, add jobs, degrees, skills and links, change the template and colors, export PDF and Word, restore a version, and write cover letters. Writes go through the same schema and sanitizer as the editor, and the tools tell the assistant to add only facts that came from you.
+
+Set `CVFREE_MCP_TOKEN` to a long random string and restart. The Settings page then shows the exact command for Claude Code and the JSON for Claude Desktop, Cursor and other clients.
+
+```bash
+claude mcp add --transport http cvfree https://cv.example.com/mcp --header "Authorization: Bearer $CVFREE_MCP_TOKEN"
+```
+
+![The MCP block on the Settings page, with the connection snippets](docs/screenshots/mcp.png)
+
+With a password set and no token the endpoint is off. Without either, it is as open as the rest of the app on that port.
 
 ## Quick start with Docker
 
@@ -161,6 +176,7 @@ All settings are environment variables. Set them in `.env` when using compose.
 | `CVFREE_PORT` | `3000` | Host port (compose only) |
 | `CVFREE_BIND` | `0.0.0.0` | Interface the port is published on. Use `127.0.0.1` with the HTTPS profile, so only Caddy is reachable. |
 | `CVFREE_PASSWORD` | empty | Password gate for the whole app. Set it on any public server. |
+| `CVFREE_MCP_TOKEN` | empty | Bearer token for the MCP endpoint at `/mcp`. Off when a password is set and this is empty. |
 | `DOMAIN` | empty | Domain for the optional Caddy HTTPS proxy |
 | `DATA_DIR` | `/data` in Docker, `./data` locally | Where resumes and settings are stored |
 | `CHROME_PATH` | auto | Chrome or Chromium binary for PDF export. Found automatically on most systems. |
@@ -191,6 +207,7 @@ Pin the exact version in `.env` (`CVFREE_IMAGE=ghcr.io/samuelbelo/cvfree:0.2.1`)
 - **Without a password, anyone who can reach the port can read and change every resume.** Keep the port on your LAN or behind a VPN, or set the password.
 - **Job postings are fetched from public addresses only.** The Tailor tab refuses links to localhost, private networks, cloud metadata addresses and anything that redirects there. Pasting the text always works.
 - **Rich text is cleaned on save and on render.** Only paragraphs, lists, bold, italic, underline, strike, alignment and `http`, `https`, `mailto` or `tel` links survive, including in imported JSON.
+- **The MCP endpoint needs its own token** and gives an assistant the same access as the password. Wrong tokens are rate limited.
 - **Logins are rate limited** per client address, and the session cookie is `HttpOnly`, `SameSite=Lax` and `Secure` behind HTTPS.
 - Found a problem? Open an issue without personal data, or email the maintainer address on the GitHub profile for anything sensitive.
 

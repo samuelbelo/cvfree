@@ -24,6 +24,7 @@ You will get an acknowledgment within 48 hours and a status update within 7 days
 - Job postings are fetched from public addresses only. Private networks, loopback, cloud metadata addresses and redirects to any of them are refused.
 - Rich text is cleaned with an allowlist on save and on render, including imported JSON.
 - Logins are rate limited per client address. The session cookie is `HttpOnly`, `SameSite=Lax`, and `Secure` behind HTTPS.
+- The MCP endpoint (`/mcp`) gives an AI assistant the same access as the password: every resume and cover letter. It needs its own bearer token (`CVFREE_MCP_TOKEN`). With a password set and no token it stays off, and wrong tokens are rate limited like wrong passwords.
 - The AI features are off until you configure a provider. When on, the resume and the job posting are sent to that provider and nowhere else.
 
 ## Self-hosting checklist

@@ -21,6 +21,7 @@ services:
       - "${CVFREE_BIND:-0.0.0.0}:${CVFREE_PORT:-3000}:3000"
     environment:
       CVFREE_PASSWORD: ${CVFREE_PASSWORD:-}
+      CVFREE_MCP_TOKEN: ${CVFREE_MCP_TOKEN:-}
       AI_BASE_URL: ${AI_BASE_URL:-}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-}
