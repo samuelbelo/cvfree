@@ -167,7 +167,7 @@ const STOPWORDS = new Set(
     "work working team teams role job position candidate candidates company experience years year strong ability skills skill " +
     "knowledge understanding good great excellent plus preferred required requirements responsibilities requirement looking join " +
     "opportunity new using use used make help well like based level within ensure provide part environment people across best " +
-    "o a os as de da do das dos e em no na nos nas um uma para por com sem que se ao à às pelo pela mais muito como ser ter seu sua " +
+    "o a os as de da do das dos e em no na nos nas um uma para por com sem que se ao à às pelo pela mais muito como ser ter seu sua são é " +
     "el la los las y en un una del al con por para es son lo le les des du et en au aux pour par sur avec dans der die das und mit von zu"
   ).split(/\s+/)
 )
@@ -181,7 +181,7 @@ const FILLER = new Set(
     "experiência experiências equipe equipa trabalho trabalhar atividades atividade responsabilidades responsabilidade conhecimento conhecimentos " +
     "habilidades habilidade competências competência formação superior completo completa cursando anos ano sênior sénior pleno júnior " +
     "benefícios salário remoto híbrido presencial empresa empresas candidato candidata oportunidade perfil atuar atuação área áreas " +
-    "disponibilidade horário contratação regime nível excelente boa bom sólida sólido forte fortes " +
+    "disponibilidade horário contratação regime nível excelente boa bom sólida sólido forte fortes avançado avançada básico intermediário fluente " +
     // Spanish
     "buscamos requisitos imprescindible deseable experiencia equipo trabajo responsabilidades conocimientos habilidades formación años " +
     "beneficios salario remoto híbrido presencial empresa candidato oportunidad perfil nivel excelente " +
