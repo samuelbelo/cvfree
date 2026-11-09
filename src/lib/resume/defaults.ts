@@ -76,7 +76,7 @@ export function emptyResume(
 }
 
 /** A fictional person used for "start from an example" and template thumbnails. */
-export function sampleResume(opts: { locale?: Locale; settings?: Partial<ResumeSettings> } = {}): Resume {
+export function sampleResume(opts: { title?: string; locale?: Locale; settings?: Partial<ResumeSettings> } = {}): Resume {
   const resume = emptyResume({ title: "Example resume", ...opts })
   resume.personal = {
     ...resume.personal,

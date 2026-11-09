@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { emptyResume, newId, normalizeResume } from "@/lib/resume/defaults"
 import { fromLinkedin, LINKEDIN_FILES } from "@/lib/resume/linkedin"
 import { getAppSettings } from "@/lib/server/app-settings"
+import { translator } from "@/lib/ui/translate"
 import { saveResume, toSummary } from "@/lib/server/repo"
 import { readUpload } from "@/lib/server/upload"
 import { unzip, type ZipEntry } from "@/lib/server/zip"
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
   }
 
   const now = new Date().toISOString()
-  const resume = normalizeResume({ ...imported, id: newId(), createdAt: now, updatedAt: now, shareToken: null })
+  const resume = normalizeResume({ ...imported, title: translator(prefs.uiLocale)("Imported from LinkedIn"), id: newId(), createdAt: now, updatedAt: now, shareToken: null })
   const saved = await saveResume(resume)
   return NextResponse.json(toSummary(saved), { status: 201 })
 }

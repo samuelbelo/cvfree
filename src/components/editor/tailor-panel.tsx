@@ -115,7 +115,8 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
 
   const saveCopy = async () => {
     await onBeforeLeave()
-    const title = jobTitle.trim() ? `${resume.title} for ${jobTitle.trim().slice(0, 60)}` : `${resume.title} (tailored)`
+    const job = jobTitle.trim().slice(0, 60)
+    const title = job ? t("{title} for {job}", { title: resume.title, job }) : t("{title} (tailored)", { title: resume.title })
     const res = await fetch(`/api/resumes/${resume.id}/duplicate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

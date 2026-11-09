@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { emptyLetter } from "@/lib/letter/defaults"
 import { LOCALES, type Locale } from "@/lib/resume/schema"
 import { getAppSettings } from "@/lib/server/app-settings"
+import { translator } from "@/lib/ui/translate"
 import { listLetters, saveLetter } from "@/lib/server/letters"
 import { getResume } from "@/lib/server/repo"
 import { toLetterSummary } from "@/lib/letter/defaults"
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
   if (body.resumeId && !resume) return NextResponse.json({ error: "Resume not found" }, { status: 404 })
   const prefs = await getAppSettings()
   const locale: Locale = LOCALES.includes(body.locale as Locale) ? (body.locale as Locale) : (resume?.locale ?? prefs.defaultLocale)
-  const letter = emptyLetter({ resume, locale, title: body.title?.slice(0, 120) || undefined })
+  const letter = emptyLetter({ resume, locale, title: body.title?.slice(0, 120) || translator(prefs.uiLocale)("Untitled cover letter") })
   if (!resume) letter.settings = { ...letter.settings, color: prefs.defaultColor }
   const saved = await saveLetter(letter)
   return NextResponse.json(toLetterSummary(saved), { status: 201 })

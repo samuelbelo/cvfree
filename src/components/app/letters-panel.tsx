@@ -97,7 +97,7 @@ export function LettersPanel({ letters, resumes }: { letters: LetterSummary[]; r
   const remove = async () => {
     if (!toDelete) return
     await api(`/api/letters/${toDelete.id}`, { method: "DELETE" })
-    toast.success(`"${toDelete.title}" deleted`)
+    toast.success(t('"{title}" deleted', { title: toDelete.title }))
     setToDelete(null)
     router.refresh()
   }

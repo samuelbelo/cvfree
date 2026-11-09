@@ -641,4 +641,15 @@ export const PT_BR: Record<string, string> = {
   "Centered header with photo and two columns split by hairlines.": "Cabeçalho centralizado com foto e duas colunas separadas por linhas finas.",
   "Full-width color band header with a right side column.": "Cabeçalho em faixa colorida de ponta a ponta com coluna lateral à direita.",
   "Two-tone two-column layout with a tinted side panel.": "Layout de duas colunas em dois tons com painel lateral colorido.",
+
+  // Names given to new resumes and letters, and what the lists say after a delete
+  "Untitled resume": "Currículo sem título",
+  "Example resume": "Currículo de exemplo",
+  "Imported resume": "Currículo importado",
+  "Imported from LinkedIn": "Importado do LinkedIn",
+  "Untitled cover letter": "Carta sem título",
+  "{title} (copy)": "{title} (cópia)",
+  "{title} for {job}": "{title} para {job}",
+  "{title} (tailored)": "{title} (adaptado)",
+  '"{title}" deleted': 'Você excluiu "{title}"',
 }

@@ -17,6 +17,9 @@ const DICTIONARIES: Record<UiLocale, Record<string, string>> = {
   "pt-BR": PT_BR,
 }
 
+/** One text in every interface language. A default name is recognised whatever language it was given in. */
+export const inEveryLanguage = (text: string) => UI_LOCALES.map((locale) => DICTIONARIES[locale][text] ?? text)
+
 const fill = (text: string, vars: Vars | undefined, number: Intl.NumberFormat) =>
   vars
     ? text.replace(/\{(\w+)\}/g, (match, name: string) => {

@@ -7,6 +7,7 @@ import { renderDocx } from "@/lib/server/docx"
 import { contentDisposition } from "@/lib/server/download"
 import { renderPdf } from "@/lib/server/pdf"
 import { getResume } from "@/lib/server/repo"
+import { inEveryLanguage } from "@/lib/ui/translate"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -22,7 +23,7 @@ export async function GET(request: Request, { params }: Ctx) {
   const search = new URL(request.url).searchParams
   const format = search.get("format") ?? "pdf"
   const disposition = search.get("inline") === "1" ? "inline" : "attachment"
-  const base = fullName(resume) ? `${fullName(resume)} ${resume.title === "Untitled resume" ? "" : resume.title}` : resume.title
+  const base = fullName(resume) ? `${fullName(resume)} ${inEveryLanguage("Untitled resume").includes(resume.title) ? "" : resume.title}` : resume.title
   const headers = (type: string, ext: string) => ({
     "Content-Type": type,
     "Content-Disposition": contentDisposition(disposition, base, ext),

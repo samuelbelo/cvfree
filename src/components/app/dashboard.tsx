@@ -110,7 +110,10 @@ export function Dashboard({
   }
 
   const duplicate = async (r: Resume) => {
-    await api(`/api/resumes/${r.id}/duplicate`, { method: "POST", body: "{}" })
+    await api(`/api/resumes/${r.id}/duplicate`, {
+      method: "POST",
+      body: JSON.stringify({ title: t("{title} (copy)", { title: r.title }) }),
+    })
     toast.success(t("Copy created"))
     router.refresh()
   }
@@ -125,7 +128,7 @@ export function Dashboard({
   const remove = async () => {
     if (!toDelete) return
     await api(`/api/resumes/${toDelete.id}`, { method: "DELETE" })
-    toast.success(`"${toDelete.title}" deleted`)
+    toast.success(t('"{title}" deleted', { title: toDelete.title }))
     setToDelete(null)
     router.refresh()
   }
