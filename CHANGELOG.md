@@ -1,3 +1,18 @@
+## [0.5.0](https://github.com/samuelbelo/cvfree/compare/v0.4.0...v0.5.0) (2026-11-09)
+
+### Features
+
+* MCP server at /mcp so an AI assistant can read, edit and export resumes and cover letters ([799792b](https://github.com/samuelbelo/cvfree/commit/799792b1d631cc2e2fb6a744326e75487032dfbb))
+* MCP status and connection snippets on the Settings page ([cc8286f](https://github.com/samuelbelo/cvfree/commit/cc8286ffd6cd5f84433bfe3fb0c36c88f9f7efd7))
+
+### Fixes
+
+* skip the Portuguese verb são and level words such as avançado in keyword matching ([a324f7a](https://github.com/samuelbelo/cvfree/commit/a324f7a03c2d65b3ce36a2d7b29d56f636b8c711))
+
+### Documentation
+
+* MCP endpoint in the README, security policy, compose file and env example ([c5b6489](https://github.com/samuelbelo/cvfree/commit/c5b64892a1164ea1c4ec820121f80990077e6df1))
+
 ## [0.4.0](https://github.com/samuelbelo/cvfree/compare/v0.3.0...v0.4.0) (2026-11-09)
 
 ### Features
