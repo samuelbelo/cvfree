@@ -5,6 +5,7 @@ import Cropper, { type Area } from "react-easy-crop"
 import { ImageUp, Trash2, User } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Slider } from "@/components/ui/slider"
@@ -26,6 +27,7 @@ async function cropToDataUrl(src: string, area: Area): Promise<string> {
 }
 
 export function PhotoUpload({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const t = useT()
   const input = useRef<HTMLInputElement>(null)
   const [source, setSource] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -34,8 +36,8 @@ export function PhotoUpload({ value, onChange }: { value: string | null; onChang
 
   const onFile = (file?: File) => {
     if (!file) return
-    if (!file.type.startsWith("image/")) return toast.error("Pick an image file")
-    if (file.size > 15 * 1024 * 1024) return toast.error("Image is larger than 15 MB")
+    if (!file.type.startsWith("image/")) return toast.error(t("Pick an image file"))
+    if (file.size > 15 * 1024 * 1024) return toast.error(t("Image is larger than 15 MB"))
     const reader = new FileReader()
     reader.onload = () => {
       setSource(reader.result as string)
@@ -59,7 +61,7 @@ export function PhotoUpload({ value, onChange }: { value: string | null; onChang
         type="button"
         onClick={() => input.current?.click()}
         className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted text-muted-foreground hover:ring-2 hover:ring-ring/40"
-        aria-label="Upload photo"
+        aria-label={t("Upload photo")}
       >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -70,11 +72,11 @@ export function PhotoUpload({ value, onChange }: { value: string | null; onChang
       </button>
       <div className="flex flex-col items-start gap-1">
         <Button variant="link" size="sm" className="h-auto p-0" onClick={() => input.current?.click()}>
-          <ImageUp /> {value ? "Change photo" : "Upload photo"}
+          <ImageUp /> {value ? t("Change photo") : t("Upload photo")}
         </Button>
         {value ? (
           <Button variant="link" size="sm" className="h-auto p-0 text-muted-foreground" onClick={() => onChange(null)}>
-            <Trash2 /> Remove
+            <Trash2 /> {t("Remove")}
           </Button>
         ) : null}
       </div>
@@ -91,7 +93,7 @@ export function PhotoUpload({ value, onChange }: { value: string | null; onChang
       <Dialog open={Boolean(source)} onOpenChange={(open) => !open && setSource(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Crop your photo</DialogTitle>
+            <DialogTitle>{t("Crop your photo")}</DialogTitle>
           </DialogHeader>
           <div className="relative h-72 overflow-hidden rounded-lg bg-muted">
             {source ? (
@@ -109,14 +111,14 @@ export function PhotoUpload({ value, onChange }: { value: string | null; onChang
             ) : null}
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">Zoom</span>
+            <span className="text-xs text-muted-foreground">{t("Zoom")}</span>
             <Slider min={1} max={3} step={0.01} value={[zoom]} onValueChange={(v) => setZoom(Array.isArray(v) ? v[0] : (v as number))} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSource(null)}>
-              Cancel
+              {t("Cancel")}
             </Button>
-            <Button onClick={save}>Use photo</Button>
+            <Button onClick={save}>{t("Use photo")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

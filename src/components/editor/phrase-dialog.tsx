@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { Plus, Search } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -27,6 +28,7 @@ export function PhraseDialog({
   locale: Locale
   onPick: (text: string) => void
 }) {
+  const t = useT()
   const lang = phraseLang(locale)
   const [family, setFamily] = useState(PHRASE_FAMILIES[0].id)
   const [query, setQuery] = useState("")
@@ -42,15 +44,14 @@ export function PhraseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{kind === "summary" ? "Summary starters" : "Bullet starters"}</DialogTitle>
+          <DialogTitle>{kind === "summary" ? t("Summary starters") : t("Bullet starters")}</DialogTitle>
           <DialogDescription>
-            Pick a sentence, then replace everything in [brackets] with your own names and numbers. Keep only numbers you can back up in an
-            interview.
+            {t("Pick a sentence, then replace everything in [brackets] with your own names and numbers. Keep only numbers you can back up in an interview.")}
           </DialogDescription>
         </DialogHeader>
         <div className="relative">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search all families..." className="h-9 pl-9" aria-label="Search phrases" />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("Search all families...")} className="h-9 pl-9" aria-label={t("Search phrases")} />
         </div>
         {!query.trim() ? (
           <div className="flex flex-wrap gap-1.5">
@@ -86,10 +87,10 @@ export function PhraseDialog({
               </Button>
             </li>
           ))}
-          {!phrases.length ? <li className="py-6 text-center text-sm text-muted-foreground">Nothing matches. Try another word.</li> : null}
+          {!phrases.length ? <li className="py-6 text-center text-sm text-muted-foreground">{t("Nothing matches. Try another word.")}</li> : null}
         </ul>
         {lang === "en" && locale !== "en" ? (
-          <p className="text-xs text-muted-foreground">Starters are in English for this language. Translate the sentence after you add it.</p>
+          <p className="text-xs text-muted-foreground">{t("Starters are in English for this language. Translate the sentence after you add it.")}</p>
         ) : null}
       </DialogContent>
     </Dialog>

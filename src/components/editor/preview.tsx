@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import { Minus, Plus } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { WORDS } from "@/lib/resume/i18n"
@@ -78,6 +79,7 @@ export function PagePreview({
   extra?: (pages: number) => ReactNode
   children: ReactNode
 }) {
+  const t = useT()
   const [frameRef, frame] = useSize<HTMLDivElement>()
   const [docRef, doc] = useSize<HTMLDivElement>()
   const [zoom, setZoom] = useState(1)
@@ -110,18 +112,18 @@ export function PagePreview({
       </div>
       {/* A toolbar of its own, so it never covers the page. */}
       <div className="flex shrink-0 items-center justify-center gap-1 border-t bg-background px-2 py-1.5">
-        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))} aria-label="Zoom out">
+        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))} aria-label={t("Zoom out")}>
           <Minus />
         </Button>
-        <button type="button" className="min-w-12 text-xs tabular-nums" onClick={() => setZoom(1)} title="Reset zoom">
+        <button type="button" className="min-w-12 text-xs tabular-nums" onClick={() => setZoom(1)} title={t("Reset zoom")}>
           {Math.round(zoom * 100)}%
         </button>
-        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)))} aria-label="Zoom in">
+        <Button size="icon" variant="ghost" className="size-7" onClick={() => setZoom((z) => Math.min(2, +(z + 0.1).toFixed(2)))} aria-label={t("Zoom in")}>
           <Plus />
         </Button>
         <span className="mx-1 h-4 w-px bg-border" />
         <span className="px-2 text-xs text-muted-foreground tabular-nums">
-          {pages} {pages === 1 ? "page" : "pages"}
+          {t(pages === 1 ? "1 page" : "{n} pages", { n: pages })}
         </span>
         {extra?.(pages)}
       </div>
@@ -130,6 +132,7 @@ export function PagePreview({
 }
 
 function PageChrome({ settings: s, locale, index, total, pageH }: { settings: ResumeSettings; locale: Locale; index: number; total: number; pageH: number }) {
+  const t = useT()
   const label = pageLabel(s, locale, index + 1, total)
   const edge = chromeEdge(s.page.marginY)
   const top = index * pageH
@@ -140,7 +143,7 @@ function PageChrome({ settings: s, locale, index, total, pageH }: { settings: Re
       {index > 0 ? (
         <div className="pointer-events-none absolute right-0 left-0 border-t-2 border-dashed border-sky-400/70" style={{ top }}>
           <span className="absolute -top-2.5 right-2 rounded bg-sky-500 px-1.5 text-[9px] font-medium text-white">
-            Page {index + 1}
+            {t("Page {n}", { n: index + 1 })}
           </span>
         </div>
       ) : null}

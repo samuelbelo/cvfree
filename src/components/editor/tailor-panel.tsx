@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Copy, Link2, Loader2, Plus, Sparkles, Wand2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -17,6 +18,7 @@ import { updateResume, useEditor, useResume } from "@/store/editor-store"
 type AiTailor = { summary: string; keywords: string[]; suggestions: string[] }
 
 export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; onBeforeLeave: () => Promise<void> }) {
+  const t = useT()
   const resume = useResume()
   const router = useRouter()
   const [url, setUrl] = useState("")
@@ -40,9 +42,9 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       if (!res.ok) throw new Error(data.error)
       setJd(data.text)
       setJobTitle(data.title)
-      toast.success("Job description loaded. Trim anything that is not the posting.")
+      toast.success(t("Job description loaded. Trim anything that is not the posting."))
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not load the page. Paste the text instead.")
+      toast.error(t(e instanceof Error ? e.message : "Could not load the page. Paste the text instead."))
     } finally {
       setFetching(false)
     }
@@ -95,7 +97,7 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       if (!res.ok) throw new Error(data.error)
       setAi(data)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "AI tailoring failed")
+      toast.error(t(e instanceof Error ? e.message : "AI tailoring failed"))
     } finally {
       setAiLoading(false)
     }
@@ -119,9 +121,9 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title }),
     })
-    if (!res.ok) return toast.error("Could not create the copy")
+    if (!res.ok) return toast.error(t("Could not create the copy"))
     const copy = await res.json()
-    toast.success("Tailored copy created")
+    toast.success(t("Tailored copy created"))
     useEditor.setState({ resume: null })
     router.push(`/resumes/${copy.id}`)
   }
@@ -131,23 +133,26 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       <Dialog open={pick !== null} onOpenChange={(open) => !open && closePick()}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add &ldquo;{pick}&rdquo;?</DialogTitle>
+            <DialogTitle>{t("Add “{skill}”?", { skill: pick ?? "" })}</DialogTitle>
             <DialogDescription>
-              The posting mentions it. Only add it if you really have it. A sentence about where you used it, with a result, says more than a word
-              in a list.
+              {t("The posting mentions it. Only add it if you really have it. A sentence about where you used it, with a result, says more than a word in a list.")}
             </DialogDescription>
           </DialogHeader>
           <Textarea
             value={evidence}
             onChange={(e) => setEvidence(e.target.value)}
-            placeholder={currentJob ? `Where did you use ${pick}? For example: "Moved the deploys to ${pick}, cutting release time from a day to an hour."` : "Add a job under Experience first to write where you used it."}
+            placeholder={
+              currentJob
+                ? t('Where did you use {skill}? For example: "Moved the deploys to {skill}, cutting release time from a day to an hour."', { skill: pick ?? "" })
+                : t("Add a job under Experience first to write where you used it.")
+            }
             disabled={!currentJob}
             className="min-h-24 text-sm"
-            aria-label="Where you used it"
+            aria-label={t("Where you used it")}
           />
           <DialogFooter className="sm:justify-between">
             <Button variant="ghost" onClick={closePick}>
-              Not really, skip
+              {t("Not really, skip")}
             </Button>
             <div className="flex gap-2">
               <Button
@@ -157,7 +162,7 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
                   closePick()
                 }}
               >
-                Skills list only
+                {t("Skills list only")}
               </Button>
               <Button
                 disabled={!currentJob || evidence.trim().length < 15}
@@ -169,27 +174,27 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
                   closePick()
                 }}
               >
-                Add bullet to {currentJob ? currentJob.label.split(" at ")[0] : "job"}
+                {currentJob ? t("Add bullet to {job}", { job: currentJob.label.split(" at ")[0] }) : t("Add bullet to job")}
               </Button>
             </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
-        <h3 className="font-semibold">Got a posting? Paste the link or the description</h3>
+        <h3 className="font-semibold">{t("Got a posting? Paste the link or the description")}</h3>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Link2 className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://company.com/jobs/123" className="h-10 pl-9" />
           </div>
           <Button className="h-10" onClick={fetchUrl} disabled={!url || fetching}>
-            {fetching ? <Loader2 className="animate-spin" /> : null} Load
+            {fetching ? <Loader2 className="animate-spin" /> : null} {t("Load")}
           </Button>
         </div>
         <Textarea
           value={jd}
           onChange={(e) => setJd(e.target.value)}
-          placeholder="Or paste the job description here..."
+          placeholder={t("Or paste the job description here...")}
           className="min-h-40 text-sm"
         />
       </section>
@@ -198,9 +203,9 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
         <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold">Keyword coverage</h3>
+              <h3 className="font-semibold">{t("Keyword coverage")}</h3>
               <p className="text-xs text-muted-foreground">
-                Share of the posting&apos;s terms that appear somewhere in your resume. A word count, not an ATS score or a hiring prediction.
+                {t("Share of the posting's terms that appear somewhere in your resume. A word count, not an ATS score or a hiring prediction.")}
               </p>
             </div>
             <span className="text-2xl font-semibold tabular-nums" style={{ color: report.score >= 60 ? "#059669" : report.score >= 35 ? "#d97706" : "#e11d48" }}>
@@ -213,7 +218,7 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
           {report.missing.length ? (
             <div className="grid gap-1.5">
               <div className="text-xs text-muted-foreground">
-                Not found in your resume. Click one to add it as a skill, only if you really have it. Better still, mention it where you used it.
+                {t("Not found in your resume. Click one to add it as a skill, only if you really have it. Better still, mention it where you used it.")}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {report.missing.map((k) => (
@@ -228,7 +233,7 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
           ) : null}
           {report.matched.length ? (
             <div className="grid gap-1.5">
-              <div className="text-xs text-muted-foreground">Already covered:</div>
+              <div className="text-xs text-muted-foreground">{t("Already covered:")}</div>
               <div className="flex flex-wrap gap-1.5">
                 {report.matched.map((k) => (
                   <Badge key={k} variant="secondary">
@@ -239,9 +244,9 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
             </div>
           ) : null}
           <div className="flex flex-wrap gap-2 pt-1">
-            <Input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder="Company or role, for the copy's name" className="h-9 flex-1" />
+            <Input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder={t("Company or role, for the copy's name")} className="h-9 flex-1" />
             <Button variant="outline" onClick={saveCopy}>
-              <Copy /> Save as tailored copy
+              <Copy /> {t("Save as tailored copy")}
             </Button>
           </div>
         </section>
@@ -250,23 +255,23 @@ export function TailorPanel({ aiEnabled, onBeforeLeave }: { aiEnabled: boolean; 
       <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h3 className="font-semibold">Tailor with AI</h3>
+            <h3 className="font-semibold">{t("Tailor with AI")}</h3>
             <p className="text-xs text-muted-foreground">
-              {aiEnabled ? "Rewrites your summary and suggests edits for this job." : "Configure an AI provider on the server to enable this."}
+              {aiEnabled ? t("Rewrites your summary and suggests edits for this job.") : t("Configure an AI provider on the server to enable this.")}
             </p>
           </div>
           <Button onClick={runAi} disabled={!aiEnabled || aiLoading || jd.trim().length < 80}>
-            {aiLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} Tailor
+            {aiLoading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t("Tailor")}
           </Button>
         </div>
         {ai ? (
           <div className="grid gap-3 text-sm">
             {ai.summary ? (
               <div className="grid gap-2 rounded-lg bg-muted/60 p-3">
-                <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Suggested summary</div>
+                <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("Suggested summary")}</div>
                 <p>{ai.summary}</p>
                 <Button size="sm" variant="outline" className="w-fit" onClick={() => applySummary(ai.summary)}>
-                  <Wand2 /> Use this summary
+                  <Wand2 /> {t("Use this summary")}
                 </Button>
               </div>
             ) : null}

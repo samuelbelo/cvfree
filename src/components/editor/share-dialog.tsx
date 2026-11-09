@@ -5,6 +5,7 @@ import { Check, Copy, ExternalLink, Link2, Share2, X } from "lucide-react"
 import { nanoid } from "nanoid"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -16,6 +17,7 @@ import { updateResume, useResume } from "@/store/editor-store"
  * the editor's conflict check keeps working.
  */
 export function ShareDialog() {
+  const t = useT()
   const token = useResume().shareToken
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -27,30 +29,29 @@ export function ShareDialog() {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {
-      toast.error("Could not copy. Select the link and copy it by hand.")
+      toast.error(t("Could not copy. Select the link and copy it by hand."))
     }
   }
 
   return (
     <>
-      <Button variant={token ? "secondary" : "ghost"} size="sm" onClick={() => setOpen(true)} aria-label="Share">
-        <Share2 /> <span className="hidden sm:inline">Share</span>
+      <Button variant={token ? "secondary" : "ghost"} size="sm" onClick={() => setOpen(true)} aria-label={t("Share")}>
+        <Share2 /> <span className="hidden sm:inline">{t("Share")}</span>
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Public link</DialogTitle>
+            <DialogTitle>{t("Public link")}</DialogTitle>
             <DialogDescription>
-              Anyone with the link can see this resume and download the PDF or Word file. They cannot edit it. The link keeps showing the
-              latest saved version until you revoke it.
+              {t("Anyone with the link can see this resume and download the PDF or Word file. They cannot edit it. The link keeps showing the latest saved version until you revoke it.")}
             </DialogDescription>
           </DialogHeader>
           {token ? (
             <div className="grid gap-3">
               <div className="flex gap-2">
-                <Input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label="Public link" className="h-10 font-mono text-xs" />
+                <Input readOnly value={url} onFocus={(e) => e.currentTarget.select()} aria-label={t("Public link")} className="h-10 font-mono text-xs" />
                 <Button variant="outline" className="h-10 shrink-0" onClick={copy}>
-                  {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy"}
+                  {copied ? <Check /> : <Copy />} {copied ? t("Copied") : t("Copy")}
                 </Button>
               </div>
               <DialogFooter className="sm:justify-between">
@@ -59,13 +60,13 @@ export function ShareDialog() {
                   className="text-destructive hover:text-destructive"
                   onClick={() => {
                     updateResume((d) => void (d.shareToken = null))
-                    toast.success("Link revoked. It stops working as soon as the resume is saved.")
+                    toast.success(t("Link revoked. It stops working as soon as the resume is saved."))
                   }}
                 >
-                  <X /> Revoke link
+                  <X /> {t("Revoke link")}
                 </Button>
                 <Button variant="outline" nativeButton={false} render={<a href={url} target="_blank" rel="noreferrer" />}>
-                  <ExternalLink /> Open
+                  <ExternalLink /> {t("Open")}
                 </Button>
               </DialogFooter>
             </div>
@@ -76,7 +77,7 @@ export function ShareDialog() {
                   updateResume((d) => void (d.shareToken = nanoid(24)))
                 }}
               >
-                <Link2 /> Create public link
+                <Link2 /> {t("Create public link")}
               </Button>
             </DialogFooter>
           )}

@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Sortable, SortableItem, SortableItemHandle } from "@/components/reui/sortable"
 import { Button } from "@/components/ui/button"
 import {
@@ -61,6 +62,7 @@ export function Card({
   defaultOpen?: boolean
   muted?: boolean
 }) {
+  const t = useT()
   const forced = useContext(CardDefaults)
   const [open, setOpen] = useState(forced ?? defaultOpen)
   return (
@@ -69,7 +71,7 @@ export function Card({
         {handle}
         <div className="min-w-0 flex-1">{title}</div>
         {actions}
-        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={open ? "Collapse" : "Expand"}>
+        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={open ? t("Collapse") : t("Expand")}>
           <ChevronDown className={cn("transition-transform", open && "rotate-180")} />
         </Button>
       </div>
@@ -84,6 +86,7 @@ export function Card({
 }
 
 export function EditPanel() {
+  const t = useT()
   const resume = useResume()
   const { score, missing } = useMemo(() => completeness(resume), [resume])
   // Remounting the cards with a new key resets their open state to the forced value.
@@ -99,7 +102,7 @@ export function EditPanel() {
             className="order-last ml-auto text-muted-foreground"
             onClick={() => setFold((f) => ({ gen: f.gen + 1, open: f.open === false ? true : false }))}
           >
-            {fold.open === false ? "Expand all" : "Collapse all"}
+            {fold.open === false ? t("Expand all") : t("Collapse all")}
           </Button>
           <span
             className={cn(
@@ -109,7 +112,7 @@ export function EditPanel() {
           >
             {score}%
           </span>
-          <span className="text-muted-foreground">Resume completeness</span>
+          <span className="text-muted-foreground">{t("Resume completeness")}</span>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
@@ -117,7 +120,7 @@ export function EditPanel() {
             style={{ width: `${score}%` }}
           />
         </div>
-        {missing.length ? <p className="mt-2 text-xs text-muted-foreground">Next: {missing[0]}</p> : null}
+        {missing.length ? <p className="mt-2 text-xs text-muted-foreground">{t("Next: {item}", { item: missing[0] })}</p> : null}
       </div>
 
       <CardDefaults.Provider value={fold.open}>
@@ -133,22 +136,23 @@ export function EditPanel() {
 }
 
 function HeaderFooterCard() {
+  const t = useT()
   const { settings } = useResume()
   const set = (patch: Partial<typeof settings>) => updateResume((d) => void Object.assign(d.settings, patch))
   return (
-    <Card title={<h2 className="font-semibold">Header &amp; Footer</h2>} defaultOpen={false}>
-      <TextField label="Header text" value={settings.headerText} placeholder="Shown at the top of every PDF page" onChange={(v) => set({ headerText: v })} />
-      <TextField label="Footer text" value={settings.footerText} placeholder="Shown at the bottom of every PDF page" onChange={(v) => set({ footerText: v })} />
+    <Card title={<h2 className="font-semibold">{t("Header & Footer")}</h2>} defaultOpen={false}>
+      <TextField label={t("Header text")} value={settings.headerText} placeholder={t("Shown at the top of every PDF page")} onChange={(v) => set({ headerText: v })} />
+      <TextField label={t("Footer text")} value={settings.footerText} placeholder={t("Shown at the bottom of every PDF page")} onChange={(v) => set({ footerText: v })} />
       <div className="grid gap-1.5">
-        <span className="text-xs text-muted-foreground">Page numbering</span>
+        <span className="text-xs text-muted-foreground">{t("Page numbering")}</span>
         <ChoiceGroup<PageNumbering>
           value={settings.pageNumbering}
           onChange={(v) => set({ pageNumbering: v })}
           options={[
-            { value: "none", label: "None" },
+            { value: "none", label: t("None") },
             { value: "numbers", label: "1, 2, 3" },
             { value: "fraction", label: "1/3" },
-            { value: "page", label: "Page 1 of 3" },
+            { value: "page", label: t("Page 1 of 3") },
           ]}
         />
       </div>
@@ -157,42 +161,43 @@ function HeaderFooterCard() {
 }
 
 function PersonalCard() {
+  const t = useT()
   const { personal: p, settings, locale } = useResume()
   const [more, setMore] = useState(Boolean(p.address || p.nationality || p.dateOfBirth || p.placeOfBirth || p.drivingLicense))
   const set = (patch: Partial<Personal>) => updateResume((d) => void Object.assign(d.personal, patch))
   const template = getTemplate(settings.template)
 
   return (
-    <Card title={<h2 className="font-semibold">Personal Details</h2>}>
+    <Card title={<h2 className="font-semibold">{t("Personal Details")}</h2>}>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <TextField label="Job title" value={p.jobTitle} placeholder="e.g. Senior Product Engineer" onChange={(v) => set({ jobTitle: v })} />
+        <TextField label={t("Job title")} value={p.jobTitle} placeholder={t("e.g. Senior Product Engineer")} onChange={(v) => set({ jobTitle: v })} />
         <div className="grid gap-1">
           <PhotoUpload value={p.photo} onChange={(photo) => set({ photo })} />
           {p.photo && !template.supportsPhoto ? (
-            <p className="text-[11px] text-amber-600">The {template.name} template does not show photos.</p>
+            <p className="text-[11px] text-amber-600">{t("The {name} template does not show photos.", { name: template.name })}</p>
           ) : null}
         </div>
-        <TextField label="First name" value={p.firstName} onChange={(v) => set({ firstName: v })} />
-        <TextField label="Last name" value={p.lastName} onChange={(v) => set({ lastName: v })} />
-        <TextField label="Email" type="email" value={p.email} onChange={(v) => set({ email: v })} />
-        <TextField label="Phone" type="tel" value={p.phone} onChange={(v) => set({ phone: v })} />
+        <TextField label={t("First name")} value={p.firstName} onChange={(v) => set({ firstName: v })} />
+        <TextField label={t("Last name")} value={p.lastName} onChange={(v) => set({ lastName: v })} />
+        <TextField label={t("Email")} type="email" value={p.email} onChange={(v) => set({ email: v })} />
+        <TextField label={t("Phone")} type="tel" value={p.phone} onChange={(v) => set({ phone: v })} />
         <TextField label="LinkedIn" value={p.linkedin} placeholder="linkedin.com/in/you" onChange={(v) => set({ linkedin: v })} />
-        <TextField label="Website" value={p.website} placeholder="yourname.dev" onChange={(v) => set({ website: v })} />
-        <TextField label="City" value={p.city} onChange={(v) => set({ city: v })} />
-        <TextField label="Country" value={p.country} onChange={(v) => set({ country: v })} />
+        <TextField label={t("Website")} value={p.website} placeholder="yourname.dev" onChange={(v) => set({ website: v })} />
+        <TextField label={t("City")} value={p.city} onChange={(v) => set({ city: v })} />
+        <TextField label={t("Country")} value={p.country} onChange={(v) => set({ country: v })} />
         {more ? (
           <>
-            <TextField label="Address" value={p.address} onChange={(v) => set({ address: v })} className="sm:col-span-2" />
-            <TextField label="Postal code" value={p.postalCode} onChange={(v) => set({ postalCode: v })} />
-            <TextField label="Nationality" value={p.nationality} onChange={(v) => set({ nationality: v })} />
-            <TextField label="Place of birth" value={p.placeOfBirth} onChange={(v) => set({ placeOfBirth: v })} />
-            <MonthPicker label="Date of birth" value={p.dateOfBirth} locale={locale} format="MM/YYYY" onChange={(v) => set({ dateOfBirth: v })} />
-            <TextField label="Driving license" value={p.drivingLicense} placeholder="e.g. B" onChange={(v) => set({ drivingLicense: v })} />
+            <TextField label={t("Address")} value={p.address} onChange={(v) => set({ address: v })} className="sm:col-span-2" />
+            <TextField label={t("Postal code")} value={p.postalCode} onChange={(v) => set({ postalCode: v })} />
+            <TextField label={t("Nationality")} value={p.nationality} onChange={(v) => set({ nationality: v })} />
+            <TextField label={t("Place of birth")} value={p.placeOfBirth} onChange={(v) => set({ placeOfBirth: v })} />
+            <MonthPicker label={t("Date of birth")} value={p.dateOfBirth} locale={locale} format="MM/YYYY" onChange={(v) => set({ dateOfBirth: v })} />
+            <TextField label={t("Driving license")} value={p.drivingLicense} placeholder={t("e.g. B")} onChange={(v) => set({ drivingLicense: v })} />
           </>
         ) : null}
       </div>
       <Button variant="link" className="h-auto justify-start p-0" onClick={() => setMore(!more)}>
-        {more ? "Hide additional details" : "Add more details"}
+        {more ? t("Hide additional details") : t("Add more details")}
         <ChevronDown className={cn("transition-transform", more && "rotate-180")} />
       </Button>
     </Card>
@@ -218,6 +223,7 @@ function SectionsList() {
 }
 
 function SectionCard({ section }: { section: Section }) {
+  const t = useT()
   const resume = useResume()
   const preset = getPreset(section.type)
   const [renaming, setRenaming] = useState(false)
@@ -258,33 +264,33 @@ function SectionCard({ section }: { section: Section }) {
           <button type="button" className="group/title flex items-center gap-2 text-left" onClick={() => setRenaming(true)}>
             <h2 className="font-semibold">{title}</h2>
             <Pencil className="size-3.5 text-muted-foreground opacity-0 group-hover/title:opacity-100" />
-            {section.hidden ? <span className="text-xs font-normal text-muted-foreground">(hidden)</span> : null}
+            {section.hidden ? <span className="text-xs font-normal text-muted-foreground">{t("(hidden)")}</span> : null}
           </button>
         )
       }
       description={preset.description}
       actions={
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Section options" />}>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("Section options")} />}>
             <MoreHorizontal />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem onClick={() => setRenaming(true)}>
-              <Pencil /> Rename
+              <Pencil /> {t("Rename")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => set((s) => void (s.hidden = !s.hidden))}>
-              {section.hidden ? <Eye /> : <EyeOff />} {section.hidden ? "Show in resume" : "Hide from resume"}
+              {section.hidden ? <Eye /> : <EyeOff />} {section.hidden ? t("Show in resume") : t("Hide from resume")}
             </DropdownMenuItem>
             {twoColumn ? (
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <Columns2 /> Column
+                  <Columns2 /> {t("Column")}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuRadioGroup value={section.column} onValueChange={(v) => set((s) => void (s.column = v as Section["column"]))}>
-                    <DropdownMenuRadioItem value="auto">Automatic ({preset.column === "main" ? "main" : "side"})</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="main">Main column</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="side">Side column</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="auto">{t(preset.column === "main" ? "Automatic (main)" : "Automatic (side)")}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="main">{t("Main column")}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="side">{t("Side column")}</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
@@ -294,7 +300,7 @@ function SectionCard({ section }: { section: Section }) {
               variant="destructive"
               onClick={() => updateResume((d) => void (d.sections = d.sections.filter((s) => s.id !== section.id)))}
             >
-              <Trash2 /> Delete section
+              <Trash2 /> {t("Delete section")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -306,12 +312,13 @@ function SectionCard({ section }: { section: Section }) {
 }
 
 function AddSection() {
+  const t = useT()
   const resume = useResume()
   const present = new Set(resume.sections.map((s) => s.type))
   const available = SECTION_PRESETS.filter((p) => !p.single || !present.has(p.type))
   return (
     <div className="rounded-xl border border-dashed p-4">
-      <h2 className="mb-3 font-semibold">Add section</h2>
+      <h2 className="mb-3 font-semibold">{t("Add section")}</h2>
       <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
         {available.map((preset) => (
           <Button

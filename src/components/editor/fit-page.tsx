@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client"
 import { Loader2, Minimize2 } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { describeFit, loosestFit, tighten } from "@/lib/resume/fit"
 import type { Resume, ResumeSettings } from "@/lib/resume/schema"
@@ -44,6 +45,7 @@ function apply(settings: ResumeSettings) {
 
 /** Shown in the preview bar while the resume runs past one page. */
 export function FitPageButton({ resume }: { resume: Resume }) {
+  const t = useT()
   const [busy, setBusy] = useState(false)
 
   const fit = () => {
@@ -60,20 +62,20 @@ export function FitPageButton({ resume }: { resume: Resume }) {
           const fitted = loosestFit(before, (candidate) => ruler.height(candidate) <= pageH + 0.5)
           if (fitted) {
             apply(fitted)
-            toast.success("Fits on one page", {
+            toast.success(t("Fits on one page"), {
               description: describeFit(before, fitted) || undefined,
               // Long enough to read what changed and still reach Undo.
               duration: 8000,
-              action: { label: "Undo", onClick: () => useEditor.getState().undo() },
+              action: { label: t("Undo"), onClick: () => useEditor.getState().undo() },
             })
             return
           }
           const tightest = tighten(before, 1)
           const pages = Math.max(2, Math.ceil((Math.round(ruler.height(tightest)) - 2) / pageH))
-          toast.warning(`Too much content for one page. The tightest readable layout still takes ${pages} pages.`, {
-            description: "Hide a section or shorten the longest entries, then try again.",
+          toast.warning(t("Too much content for one page. The tightest readable layout still takes {pages} pages.", { pages }), {
+            description: t("Hide a section or shorten the longest entries, then try again."),
             duration: 10000,
-            action: { label: "Tighten anyway", onClick: () => apply(tightest) },
+            action: { label: t("Tighten anyway"), onClick: () => apply(tightest) },
           })
         } finally {
           ruler.done()
@@ -85,7 +87,7 @@ export function FitPageButton({ resume }: { resume: Resume }) {
 
   return (
     <Button size="sm" variant="outline" className="h-7 gap-1.5 px-2 text-xs" onClick={fit} disabled={busy}>
-      {busy ? <Loader2 className="animate-spin" /> : <Minimize2 />} Fit to one page
+      {busy ? <Loader2 className="animate-spin" /> : <Minimize2 />} {t("Fit to one page")}
     </Button>
   )
 }

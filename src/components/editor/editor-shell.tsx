@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -55,6 +56,7 @@ const TABS: { id: Tab; label: string }[] = [
 const SAVE_DELAY = 800
 
 export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled: boolean }) {
+  const t = useT()
   const resume = useEditor((s) => s.resume)
   const saveState = useEditor((s) => s.saveState)
   const canUndo = useEditor((s) => s.past.length > 0)
@@ -89,10 +91,10 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
       })
       if (res.status === 409) {
         useEditor.getState().setSaveState("conflict")
-        toast.error("This resume was changed in another tab or window. Reload to see it. Your edits here will not be saved.", {
+        toast.error(t("This resume was changed in another tab or window. Reload to see it. Your edits here will not be saved."), {
           id: "conflict",
           duration: Infinity,
-          action: { label: "Reload", onClick: () => window.location.reload() },
+          action: { label: t("Reload"), onClick: () => window.location.reload() },
         })
         return
       }
@@ -104,7 +106,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
     } catch {
       useEditor.getState().setSaveState("error")
     }
-  }, [])
+  }, [t])
 
   // Autosave: every change restarts a short timer.
   useEffect(() => {
@@ -171,12 +173,12 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
   const download = async (format: "pdf" | "docx" | "txt" | "json" | "jsonresume") => {
     await flush()
     if (format === "docx" && !getTemplate(resume.settings.template).tags.includes("docx")) {
-      toast.info("Word export uses a clean single-column layout for this template.")
+      toast.info(t("Word export uses a clean single-column layout for this template."))
     }
-    const id = toast.loading(`Preparing ${format === "jsonresume" ? "JSON Resume" : format.toUpperCase()}...`)
+    const id = toast.loading(t("Preparing {format}...", { format: format === "jsonresume" ? "JSON Resume" : format.toUpperCase() }))
     try {
       const res = await fetch(`/api/resumes/${resume.id}/export?format=${format}`)
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `Export failed (${res.status})`)
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? t("Export failed ({status})", { status: res.status }))
       const blob = await res.blob()
       const disposition = res.headers.get("Content-Disposition") ?? ""
       const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1]
@@ -186,9 +188,9 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
       a.download = name
       a.click()
       setTimeout(() => URL.revokeObjectURL(a.href), 2000)
-      toast.success(`${name} downloaded`, { id })
+      toast.success(t("{name} downloaded", { name }), { id })
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Export failed", { id })
+      toast.error(t(e instanceof Error ? e.message : "Export failed"), { id })
     }
   }
 
@@ -201,65 +203,65 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
   return (
     <div className="flex h-dvh flex-col bg-muted/40">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-3">
-        <Button variant="ghost" size="icon" nativeButton={false} render={<Link href="/" aria-label="Back to dashboard" />}>
+        <Button variant="ghost" size="icon" nativeButton={false} render={<Link href="/" aria-label={t("Back to dashboard")} />}>
           <ArrowLeft />
         </Button>
         <input
           value={resume.title}
           onChange={(e) => updateResume((d) => void (d.title = e.target.value))}
           className="w-24 min-w-0 flex-1 truncate rounded-md bg-transparent px-2 py-1 text-sm font-medium outline-none hover:bg-muted focus:bg-muted sm:flex-none md:w-40 lg:w-64"
-          aria-label="Resume name"
+          aria-label={t("Resume name")}
         />
         <LanguageMenu locale={resume.locale} className="hidden sm:inline-flex" />
 
         <nav className="mx-auto hidden items-center rounded-lg bg-muted p-1 md:flex">
-          {TABS.map((t) => (
+          {TABS.map((entry) => (
             <button
-              key={t.id}
+              key={entry.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(entry.id)}
               className={cn(
                 "rounded-md px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
-                tab === t.id && "bg-background font-medium text-foreground shadow-sm"
+                tab === entry.id && "bg-background font-medium text-foreground shadow-sm"
               )}
             >
-              {t.label}
+              {t(entry.label)}
             </button>
           ))}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1 md:ml-0">
           <SaveIndicator state={saveState} />
-          <Button variant="ghost" size="icon" disabled={!canUndo} onClick={() => useEditor.getState().undo()} aria-label="Undo">
+          <Button variant="ghost" size="icon" disabled={!canUndo} onClick={() => useEditor.getState().undo()} aria-label={t("Undo")}>
             <Undo2 />
           </Button>
-          <Button variant="ghost" size="icon" disabled={!canRedo} onClick={() => useEditor.getState().redo()} aria-label="Redo">
+          <Button variant="ghost" size="icon" disabled={!canRedo} onClick={() => useEditor.getState().redo()} aria-label={t("Redo")}>
             <Redo2 />
           </Button>
           <ShareDialog />
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button className="ml-1" aria-label="Download" />}>
-              <Download /> <span className="hidden sm:inline">Download</span> <ChevronDown className="hidden sm:block" />
+            <DropdownMenuTrigger render={<Button className="ml-1" aria-label={t("Download")} />}>
+              <Download /> <span className="hidden sm:inline">{t("Download")}</span> <ChevronDown className="hidden sm:block" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem onClick={() => download("pdf")}>
                 <FileText className="text-rose-500" /> PDF
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => download("docx")}>
-                <FileType2 className="text-sky-600" /> Word (DOCX)
+                <FileType2 className="text-sky-600" /> {t("Word (DOCX)")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => download("txt")}>
-                <FileText className="text-muted-foreground" /> Plain text (TXT)
+                <FileText className="text-muted-foreground" /> {t("Plain text (TXT)")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => download("json")}>
-                <FileJson className="text-amber-600" /> Backup (JSON)
+                <FileJson className="text-amber-600" /> {t("Backup (JSON)")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => download("jsonresume")}>
                 <FileJson className="text-emerald-600" /> JSON Resume
               </DropdownMenuItem>
               <DropdownMenuItem onClick={print}>
-                <Printer /> Print from browser
+                <Printer /> {t("Print from browser")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -268,7 +270,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
                   setHistoryOpen(true)
                 }}
               >
-                <History /> Version history
+                <History /> {t("Version history")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -276,13 +278,13 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
       </header>
 
       <nav className="flex shrink-0 gap-1 overflow-x-auto border-b bg-background px-2 py-1.5 md:hidden">
-        {TABS.map((t) => (
-          <Button key={t.id} size="sm" variant={tab === t.id && !mobilePreview ? "secondary" : "ghost"} onClick={() => { setTab(t.id); setMobilePreview(false) }}>
-            {t.label}
+        {TABS.map((entry) => (
+          <Button key={entry.id} size="sm" variant={tab === entry.id && !mobilePreview ? "secondary" : "ghost"} onClick={() => { setTab(entry.id); setMobilePreview(false) }}>
+            {t(entry.label)}
           </Button>
         ))}
         <Button size="sm" variant={mobilePreview ? "secondary" : "ghost"} onClick={() => setMobilePreview(true)}>
-          Preview
+          {t("Preview")}
         </Button>
         <LanguageMenu locale={resume.locale} className="ml-auto sm:hidden" />
       </nav>
@@ -314,6 +316,7 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
 }
 
 function LanguageMenu({ locale, className }: { locale: Locale; className?: string }) {
+  const t = useT()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="ghost" size="sm" className={cn("text-muted-foreground", className)} />}>
@@ -321,7 +324,7 @@ function LanguageMenu({ locale, className }: { locale: Locale; className?: strin
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Resume language</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("Resume language")}</DropdownMenuLabel>
           {LOCALES.map((l) => (
             <DropdownMenuItem key={l} onClick={() => updateResume((d) => void (d.locale = l as Locale))}>
               {locale === l ? <Check /> : <span className="size-4" />} {LOCALE_NAMES[l]}
@@ -335,14 +338,15 @@ function LanguageMenu({ locale, className }: { locale: Locale; className?: strin
 
 /** Always visible. On narrow screens only the icon shows, with the word in the tooltip. */
 function SaveIndicator({ state }: { state: string }) {
+  const t = useT()
   const [icon, text, tone] =
     state === "saving"
-      ? [<Loader2 key="i" className="size-3.5 animate-spin" />, "Saving", "text-muted-foreground"]
+      ? [<Loader2 key="i" className="size-3.5 animate-spin" />, t("Saving"), "text-muted-foreground"]
       : state === "error"
-        ? [<CloudOff key="i" className="size-3.5" />, "Not saved", "text-destructive"]
+        ? [<CloudOff key="i" className="size-3.5" />, t("Not saved"), "text-destructive"]
         : state === "conflict"
-          ? [<CloudOff key="i" className="size-3.5" />, "Changed elsewhere", "text-destructive"]
-          : [<Check key="i" className="size-3.5" />, "Saved", "text-muted-foreground"]
+          ? [<CloudOff key="i" className="size-3.5" />, t("Changed elsewhere"), "text-destructive"]
+          : [<Check key="i" className="size-3.5" />, t("Saved"), "text-muted-foreground"]
   const alert = state === "error" || state === "conflict"
   return (
     <span className={`flex items-center gap-1 px-1.5 text-xs sm:px-2 ${tone}`} title={text} role="status">

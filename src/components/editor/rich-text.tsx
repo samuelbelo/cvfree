@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { PromptDialog } from "@/components/app/prompt-dialog"
 import { hrefFor } from "@/lib/resume/format"
 import type { PhraseKind } from "@/lib/resume/phrases"
@@ -58,6 +59,7 @@ function Btn({ icon: Icon, active, onClick, label }: { icon: LucideIcon; active?
 
 /** Small rich text editor. Stores HTML, which templates render as is. */
 export function RichText({ value, onChange, placeholder, minHeight = 110, help }: Props) {
+  const t = useT()
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
@@ -131,22 +133,22 @@ export function RichText({ value, onChange, placeholder, minHeight = 110, help }
       <div className="flex flex-wrap items-center gap-0.5 border-b px-1.5 py-1">
         {editor && state ? (
           <>
-            <Btn icon={Bold} label="Bold" active={state.bold} onClick={() => chain().toggleBold().run()} />
-            <Btn icon={Italic} label="Italic" active={state.italic} onClick={() => chain().toggleItalic().run()} />
-            <Btn icon={Underline} label="Underline" active={state.underline} onClick={() => chain().toggleUnderline().run()} />
-            <Btn icon={Strikethrough} label="Strikethrough" active={state.strike} onClick={() => chain().toggleStrike().run()} />
+            <Btn icon={Bold} label={t("Bold")} active={state.bold} onClick={() => chain().toggleBold().run()} />
+            <Btn icon={Italic} label={t("Italic")} active={state.italic} onClick={() => chain().toggleItalic().run()} />
+            <Btn icon={Underline} label={t("Underline")} active={state.underline} onClick={() => chain().toggleUnderline().run()} />
+            <Btn icon={Strikethrough} label={t("Strikethrough")} active={state.strike} onClick={() => chain().toggleStrike().run()} />
             <span className="mx-1 h-4 w-px bg-border" />
-            <Btn icon={AlignLeft} label="Align left" active={state.left} onClick={() => chain().setTextAlign("left").run()} />
-            <Btn icon={AlignCenter} label="Center" active={state.center} onClick={() => chain().setTextAlign("center").run()} />
-            <Btn icon={AlignRight} label="Align right" active={state.right} onClick={() => chain().setTextAlign("right").run()} />
-            <Btn icon={AlignJustify} label="Justify" active={state.justify} onClick={() => chain().setTextAlign("justify").run()} />
+            <Btn icon={AlignLeft} label={t("Align left")} active={state.left} onClick={() => chain().setTextAlign("left").run()} />
+            <Btn icon={AlignCenter} label={t("Align center")} active={state.center} onClick={() => chain().setTextAlign("center").run()} />
+            <Btn icon={AlignRight} label={t("Align right")} active={state.right} onClick={() => chain().setTextAlign("right").run()} />
+            <Btn icon={AlignJustify} label={t("Justify")} active={state.justify} onClick={() => chain().setTextAlign("justify").run()} />
             <span className="mx-1 h-4 w-px bg-border" />
-            <Btn icon={ListOrdered} label="Numbered list" active={state.ordered} onClick={() => chain().toggleOrderedList().run()} />
-            <Btn icon={List} label="Bullet list" active={state.bullet} onClick={() => chain().toggleBulletList().run()} />
+            <Btn icon={ListOrdered} label={t("Numbered list")} active={state.ordered} onClick={() => chain().toggleOrderedList().run()} />
+            <Btn icon={List} label={t("Bullet list")} active={state.bullet} onClick={() => chain().toggleBulletList().run()} />
             <span className="mx-1 h-4 w-px bg-border" />
             <Btn
               icon={Link2}
-              label="Link"
+              label={t("Link")}
               active={state.link}
               onClick={() => {
                 if (state.link) return chain().unsetLink().run()
@@ -160,7 +162,7 @@ export function RichText({ value, onChange, placeholder, minHeight = 110, help }
                 onClick={() => setHelpOpen(true)}
                 className="ml-auto flex h-7 items-center gap-1 rounded-md px-2 text-xs text-primary hover:bg-background"
               >
-                <WandSparkles className="size-3.5" /> Help me write
+                <WandSparkles className="size-3.5" /> {t("Help me write")}
               </button>
             ) : null}
           </>
@@ -172,9 +174,9 @@ export function RichText({ value, onChange, placeholder, minHeight = 110, help }
       {help ? <PhraseDialog open={helpOpen} onOpenChange={setHelpOpen} kind={help.kind} locale={help.locale} onPick={insertPhrase} /> : null}
       <PromptDialog
         open={linkOpen}
-        title="Add link"
+        title={t("Add link")}
         placeholder="https://example.com"
-        confirmLabel="Add link"
+        confirmLabel={t("Add link")}
         onOpenChange={setLinkOpen}
         onConfirm={(url) => url && chain().extendMarkRange("link").setLink({ href: hrefFor(url) }).run()}
       />

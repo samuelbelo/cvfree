@@ -3,6 +3,7 @@
 import { useId, useMemo, useState } from "react"
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -43,6 +44,7 @@ export function MonthPicker({
   locale?: Locale
   format?: DateFormat
 }) {
+  const t = useT()
   const id = useId()
   const parsed = parse(value)
   const [open, setOpen] = useState(false)
@@ -81,13 +83,13 @@ export function MonthPicker({
         </PopoverTrigger>
         <PopoverContent className="w-64 p-3" align="start">
           <div className="mb-2 flex items-center justify-between">
-            <Button variant="ghost" size="icon" aria-label="Previous year" onClick={() => setYear((y) => y - 1)}>
+            <Button variant="ghost" size="icon" aria-label={t("Previous year")} onClick={() => setYear((y) => y - 1)}>
               <ChevronLeft />
             </Button>
             <button
               type="button"
               className="rounded-md px-2 py-1 text-sm font-semibold hover:bg-muted"
-              title="Use the year only"
+              title={t("Use the year only")}
               onClick={() => {
                 onChange(String(year))
                 setOpen(false)
@@ -95,11 +97,11 @@ export function MonthPicker({
             >
               {year}
             </button>
-            <Button variant="ghost" size="icon" aria-label="Next year" onClick={() => setYear((y) => y + 1)}>
+            <Button variant="ghost" size="icon" aria-label={t("Next year")} onClick={() => setYear((y) => y + 1)}>
               <ChevronRight />
             </Button>
           </div>
-          <div className="grid grid-cols-3 gap-1" role="grid" aria-label={`Months of ${year}`}>
+          <div className="grid grid-cols-3 gap-1" role="grid" aria-label={t("Months of {year}", { year })}>
             {MONTHS.map((name, i) => {
               const selected = parsed?.year === year && parsed.month === i + 1
               return (
@@ -131,7 +133,7 @@ export function MonthPicker({
                 setOpen(false)
               }}
             >
-              <X /> Clear
+              <X /> {t("Clear")}
             </Button>
           ) : null}
         </PopoverContent>

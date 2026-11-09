@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { AlertCircle, CheckCircle2, Info, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { completeness, reviewResume, type ReviewIssue } from "@/lib/resume/analysis"
 import { cn } from "@/lib/utils"
@@ -23,6 +24,7 @@ const ICON = {
 }
 
 export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
+  const t = useT()
   const resume = useResume()
   const issues = useMemo(() => reviewResume(resume), [resume])
   const { score } = useMemo(() => completeness(resume), [resume])
@@ -41,7 +43,7 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
       if (!res.ok) throw new Error(data.error)
       setAi(data)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "AI review failed")
+      toast.error(t(e instanceof Error ? e.message : "AI review failed"))
     } finally {
       setLoading(false)
     }
@@ -55,20 +57,20 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-2 gap-4">
-        <Stat label="Completeness" value={`${score}%`} tone={score >= 80 ? "good" : score >= 50 ? "ok" : "bad"} />
+        <Stat label={t("Completeness")} value={`${score}%`} tone={score >= 80 ? "good" : score >= 50 ? "ok" : "bad"} />
         <Stat
-          label="Issues found"
+          label={t("Issues found")}
           value={String(issues.length)}
           tone={issues.some((i) => i.severity === "high") ? "bad" : issues.length ? "ok" : "good"}
         />
       </div>
 
       <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
-        <h3 className="font-semibold">Instant checks</h3>
-        <p className="-mt-2 text-xs text-muted-foreground">Runs in your browser as you type. Nothing is sent anywhere.</p>
+        <h3 className="font-semibold">{t("Instant checks")}</h3>
+        <p className="-mt-2 text-xs text-muted-foreground">{t("Runs in your browser as you type. Nothing is sent anywhere.")}</p>
         {issues.length === 0 ? (
           <div className="flex items-center gap-2 text-sm text-emerald-700">
-            <CheckCircle2 className="size-4" /> No problems found. Nice work.
+            <CheckCircle2 className="size-4" /> {t("No problems found. Nice work.")}
           </div>
         ) : (
           Object.entries(grouped).map(([area, list]) => (
@@ -88,15 +90,15 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
       <section className="grid gap-3 rounded-xl border bg-card p-4 shadow-xs">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h3 className="font-semibold">AI review</h3>
+            <h3 className="font-semibold">{t("AI review")}</h3>
             <p className="text-xs text-muted-foreground">
               {aiEnabled
-                ? "Sends your resume to the AI provider configured on this server."
-                : "Set AI_MODEL, AI_API_KEY and AI_BASE_URL to enable. Works with OpenAI, OpenRouter or a local Ollama."}
+                ? t("Sends your resume to the AI provider configured on this server.")
+                : t("Set AI_MODEL, AI_API_KEY and AI_BASE_URL to enable. Works with OpenAI, OpenRouter or a local Ollama.")}
             </p>
           </div>
           <Button onClick={runAi} disabled={!aiEnabled || loading}>
-            {loading ? <Loader2 className="animate-spin" /> : <Sparkles />} Get review
+            {loading ? <Loader2 className="animate-spin" /> : <Sparkles />} {t("Get review")}
           </Button>
         </div>
         {ai ? (
@@ -107,7 +109,7 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
             </div>
             {ai.strengths?.length ? (
               <div>
-                <div className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Strengths</div>
+                <div className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("Strengths")}</div>
                 <ul className="list-disc space-y-1 pl-5">
                   {ai.strengths.map((s, i) => (
                     <li key={i}>{s}</li>
@@ -117,7 +119,7 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
             ) : null}
             {ai.improvements?.length ? (
               <div>
-                <div className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Improve</div>
+                <div className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("Improve")}</div>
                 <ul className="space-y-2">
                   {ai.improvements.map((s, i) => (
                     <li key={i} className="rounded-lg bg-muted/60 p-2">

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react"
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Sortable, SortableItem, SortableItemHandle } from "@/components/reui/sortable"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -46,6 +47,7 @@ export function SectionBodyEditor({ section }: { section: Section }) {
 }
 
 function TextSectionEditor({ section }: { section: SectionOf<"text"> }) {
+  const t = useT()
   const update = useSectionUpdater<"text">(section.id)
   const resume = useResume()
   const preset = getPreset(section.type)
@@ -60,7 +62,7 @@ function TextSectionEditor({ section }: { section: SectionOf<"text"> }) {
       />
       {section.type === "summary" ? (
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Recruiter tip: 400 to 600 characters reads best.</span>
+          <span>{t("Recruiter tip: 400 to 600 characters reads best.")}</span>
           <span className={cn("tabular-nums", length >= 400 && length <= 600 && "text-emerald-600")}>{length} / 600</span>
         </div>
       ) : null}
@@ -87,6 +89,7 @@ function ItemCard({
   children: ReactNode
   defaultOpen?: boolean
 }) {
+  const t = useT()
   const [open, setOpen] = useState(Boolean(defaultOpen))
   return (
     <SortableItem value={id} className="group/item rounded-lg border bg-background">
@@ -95,10 +98,10 @@ function ItemCard({
           <GripVertical className="size-4" />
         </SortableItemHandle>
         <button type="button" className="min-w-0 flex-1 px-1 text-left" onClick={() => setOpen(!open)}>
-          <div className="truncate text-sm font-medium">{title || "(Not specified)"}</div>
+          <div className="truncate text-sm font-medium">{title || t("(Not specified)")}</div>
           {subtitle ? <div className="truncate text-xs text-muted-foreground">{subtitle}</div> : null}
         </button>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={open ? "Collapse" : "Expand"}>
+        <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} aria-label={open ? t("Collapse") : t("Expand")}>
           <ChevronDown className={cn("transition-transform", open && "rotate-180")} />
         </Button>
         <Button
@@ -106,7 +109,7 @@ function ItemCard({
           size="icon"
           className="text-muted-foreground opacity-0 group-hover/item:opacity-100 hover:text-destructive"
           onClick={onDelete}
-          aria-label="Delete"
+          aria-label={t("Delete")}
         >
           <Trash2 />
         </Button>
@@ -129,6 +132,7 @@ function AddButton({ onClick, children }: { onClick: () => void; children: React
 /* ------------------------------------------------------------------ */
 
 function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
+  const t = useT()
   const resume = useResume()
   const update = useSectionUpdater<"timeline">(section.id)
   const preset = getPreset(section.type)
@@ -159,12 +163,12 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
               onDelete={() => update((s) => void s.items.splice(index, 1))}
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <TextField label={fields.title} value={item.title} onChange={(v) => set({ title: v })} />
-                <TextField label={fields.subtitle} value={item.subtitle} onChange={(v) => set({ subtitle: v })} />
+                <TextField label={t(fields.title)} value={item.title} onChange={(v) => set({ title: v })} />
+                <TextField label={t(fields.subtitle)} value={item.subtitle} onChange={(v) => set({ subtitle: v })} />
                 <div className="grid grid-cols-2 gap-2">
-                  <MonthPicker label="Start date" value={item.startDate} locale={resume.locale} format={resume.settings.dateFormat} onChange={(v) => set({ startDate: v })} />
+                  <MonthPicker label={t("Start date")} value={item.startDate} locale={resume.locale} format={resume.settings.dateFormat} onChange={(v) => set({ startDate: v })} />
                   <MonthPicker
-                    label="End date"
+                    label={t("End date")}
                     value={item.current ? "" : item.endDate}
                     placeholder={item.current ? WORDS[resume.locale].present : "MM / YYYY"}
                     disabled={item.current}
@@ -174,21 +178,21 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
                   />
                 </div>
                 {fields.city ? (
-                  <TextField label={fields.city} value={item.city} onChange={(v) => set({ city: v })} />
+                  <TextField label={t(fields.city)} value={item.city} onChange={(v) => set({ city: v })} />
                 ) : (
                   <div />
                 )}
               </div>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={item.current} onCheckedChange={(v) => set({ current: Boolean(v) })} />
-                Currently here ({WORDS[resume.locale].present})
+                {t("Currently here ({word})", { word: WORDS[resume.locale].present })}
               </label>
               <div className="grid gap-1.5">
-                <Label className="text-xs font-normal text-muted-foreground">Description</Label>
+                <Label className="text-xs font-normal text-muted-foreground">{t("Description")}</Label>
                 <RichText
                   value={item.description}
                   onChange={(html) => set({ description: html })}
-                  placeholder="Start bullets with a verb and add numbers: Cut load time by 40% by..."
+                  placeholder={t("Start bullets with a verb and add numbers: Cut load time by 40% by...")}
                   help={{ kind: "bullet", locale: resume.locale }}
                 />
               </div>
@@ -203,8 +207,7 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
           update((s) => void s.items.push(item))
         }}
       >
-        Add {section.items.length ? "one more " : ""}
-        {fields.title.toLowerCase()}
+        {t(section.items.length ? "Add one more {thing}" : "Add {thing}", { thing: t(fields.title).toLowerCase() })}
       </AddButton>
     </div>
   )
@@ -215,6 +218,7 @@ function TimelineEditor({ section }: { section: SectionOf<"timeline"> }) {
 /* ------------------------------------------------------------------ */
 
 function LevelPicker({ value, onChange, labels }: { value: number; onChange: (n: number) => void; labels: readonly string[] }) {
+  const t = useT()
   return (
     <div className="grid gap-1">
       <div className="flex h-8 overflow-hidden rounded-md border">
@@ -228,12 +232,13 @@ function LevelPicker({ value, onChange, labels }: { value: number; onChange: (n:
           />
         ))}
       </div>
-      <span className="text-[11px] text-muted-foreground">{value ? labels[value - 1] : "No level"}</span>
+      <span className="text-[11px] text-muted-foreground">{value ? labels[value - 1] : t("No level")}</span>
     </div>
   )
 }
 
 function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
+  const t = useT()
   const resume = useResume()
   const update = useSectionUpdater<"skills">(section.id)
   const preset = getPreset(section.type)
@@ -244,7 +249,7 @@ function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
     <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <Switch checked={!section.showLevel} onCheckedChange={(v) => update((s) => void (s.showLevel = !v))} />
-        Don&apos;t show level
+        {t("Don't show level")}
       </label>
       <Sortable
         value={section.items}
@@ -259,7 +264,7 @@ function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
             </SortableItemHandle>
             <Input
               value={item.name}
-              placeholder={preset.languageLevels ? "Language" : "Skill"}
+              placeholder={preset.languageLevels ? t("Language") : t("Skill")}
               onChange={(e) => update((s) => void (s.items[index].name = e.target.value))}
               className="h-9 flex-1 bg-muted/50"
             />
@@ -273,7 +278,7 @@ function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
               size="icon"
               className="mt-0.5 text-muted-foreground hover:text-destructive"
               onClick={() => update((s) => void s.items.splice(index, 1))}
-              aria-label="Delete"
+              aria-label={t("Delete")}
             >
               <Trash2 />
             </Button>
@@ -282,11 +287,11 @@ function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
       </Sortable>
       <div className="flex flex-wrap gap-1">
         <AddButton onClick={() => update((s) => void s.items.push(createSkillItem()))}>
-          Add {preset.languageLevels ? "language" : "skill"}
+          {t(preset.languageLevels ? "Add language" : "Add skill")}
         </AddButton>
         {section.items.length > 0 ? (
           <Button variant="ghost" className="text-muted-foreground" onClick={() => update((s) => void (s.items = []))}>
-            <Trash2 /> Delete all
+            <Trash2 /> {t("Delete all")}
           </Button>
         ) : null}
       </div>
@@ -299,6 +304,7 @@ function SkillsEditor({ section }: { section: SectionOf<"skills"> }) {
 /* ------------------------------------------------------------------ */
 
 function LinksEditor({ section }: { section: SectionOf<"links"> }) {
+  const t = useT()
   const update = useSectionUpdater<"links">(section.id)
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
@@ -315,7 +321,7 @@ function LinksEditor({ section }: { section: SectionOf<"links"> }) {
             </SortableItemHandle>
             <Input
               value={item.label}
-              placeholder="Label (GitHub)"
+              placeholder={t("Label (GitHub)")}
               onChange={(e) => update((s) => void (s.items[index].label = e.target.value))}
               className="h-9 w-36 bg-muted/50"
             />
@@ -330,25 +336,26 @@ function LinksEditor({ section }: { section: SectionOf<"links"> }) {
               size="icon"
               className="text-muted-foreground hover:text-destructive"
               onClick={() => update((s) => void s.items.splice(index, 1))}
-              aria-label="Delete"
+              aria-label={t("Delete")}
             >
               <Trash2 />
             </Button>
           </SortableItem>
         ))}
       </Sortable>
-      <AddButton onClick={() => update((s) => void s.items.push({ id: newId(), label: "", url: "" }))}>Add link</AddButton>
+      <AddButton onClick={() => update((s) => void s.items.push({ id: newId(), label: "", url: "" }))}>{t("Add link")}</AddButton>
     </div>
   )
 }
 
 function ReferencesEditor({ section }: { section: SectionOf<"references"> }) {
+  const t = useT()
   const update = useSectionUpdater<"references">(section.id)
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
       <label className="flex items-center gap-2 text-sm text-muted-foreground">
         <Switch checked={section.onRequest} onCheckedChange={(v) => update((s) => void (s.onRequest = v))} />
-        Show &quot;available upon request&quot; instead
+        {t('Show "available upon request" instead')}
       </label>
       {!section.onRequest ? (
         <>
@@ -369,10 +376,10 @@ function ReferencesEditor({ section }: { section: SectionOf<"references"> }) {
                   onDelete={() => update((s) => void s.items.splice(index, 1))}
                 >
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <TextField label="Full name" value={item.name} onChange={(v) => set({ name: v })} />
-                    <TextField label="Company" value={item.company} onChange={(v) => set({ company: v })} />
-                    <TextField label="Email" value={item.email} onChange={(v) => set({ email: v })} />
-                    <TextField label="Phone" value={item.phone} onChange={(v) => set({ phone: v })} />
+                    <TextField label={t("Full name")} value={item.name} onChange={(v) => set({ name: v })} />
+                    <TextField label={t("Company")} value={item.company} onChange={(v) => set({ company: v })} />
+                    <TextField label={t("Email")} value={item.email} onChange={(v) => set({ email: v })} />
+                    <TextField label={t("Phone")} value={item.phone} onChange={(v) => set({ phone: v })} />
                   </div>
                 </ItemCard>
               )
@@ -381,7 +388,7 @@ function ReferencesEditor({ section }: { section: SectionOf<"references"> }) {
           <AddButton
             onClick={() => update((s) => void s.items.push({ id: newId(), name: "", company: "", email: "", phone: "" }))}
           >
-            Add reference
+            {t("Add reference")}
           </AddButton>
         </>
       ) : null}
