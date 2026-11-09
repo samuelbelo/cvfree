@@ -1,5 +1,6 @@
 import { fullName, htmlToText, isHtmlEmpty } from "./format"
 import type { Resume, Section } from "./schema"
+import { translator, type Vars } from "@/lib/ui/translate"
 
 /*
  * Offline checks. No AI needed: completeness score, writing hints and a
@@ -56,8 +57,17 @@ export type ReviewIssue = {
   id: string
   severity: "high" | "medium" | "low"
   area: string
+  /** The finished sentence, in English. */
   message: string
+  /** The same sentence before its values went in. This is what the interface translates. */
+  text: string
+  vars?: Vars
 }
+
+/** Stands in for a job that has no title and no employer yet. */
+export const UNNAMED_JOB = "A job"
+
+const english = translator("en")
 
 const WEAK_PHRASES = [
   "responsible for",
@@ -73,8 +83,8 @@ const WEAK_PHRASES = [
 
 export function reviewResume(resume: Resume): ReviewIssue[] {
   const issues: ReviewIssue[] = []
-  const add = (severity: ReviewIssue["severity"], area: string, message: string) =>
-    issues.push({ id: `${area}-${issues.length}`, severity, area, message })
+  const add = (severity: ReviewIssue["severity"], area: string, text: string, vars?: Vars) =>
+    issues.push({ id: `${area}-${issues.length}`, severity, area, message: english(text, vars), text, vars })
   const p = resume.personal
 
   if (!p.email) add("high", "Contact", "Recruiters need an email address to reach you.")
@@ -85,27 +95,27 @@ export function reviewResume(resume: Resume): ReviewIssue[] {
   const summary = summaryLength(resume)
   if (summary === 0) add("high", "Summary", "Write a short professional summary.")
   // Same thresholds as the completeness score: 200 is the floor, 600 a comfortable ceiling.
-  else if (summary < 200) add("medium", "Summary", `Your summary has ${summary} characters. Two to four sentences, 200 to 600 characters, read well.`)
-  else if (summary > 750) add("low", "Summary", `Your summary has ${summary} characters. Trimming it to about 600 keeps it scannable.`)
+  else if (summary < 200) add("medium", "Summary", "Your summary has {n} characters. Two to four sentences, 200 to 600 characters, read well.", { n: summary })
+  else if (summary > 750) add("low", "Summary", "Your summary has {n} characters. Trimming it to about 600 keeps it scannable.", { n: summary })
 
   const exp = find(resume, "experience")
   if (exp?.kind === "timeline") {
     if (!exp.items.length) add("high", "Experience", "Add your work experience, most recent first.")
     exp.items.forEach((item) => {
-      const label = item.title || item.subtitle || "A job"
+      const label = item.title || item.subtitle || UNNAMED_JOB
       const text = htmlToText(item.description)
-      if (!item.startDate) add("medium", "Experience", `${label}: add a start date.`)
-      if (!item.endDate && !item.current && item.startDate) add("low", "Experience", `${label}: add an end date or mark it as current.`)
-      if (!text) add("high", "Experience", `${label}: describe what you achieved.`)
+      if (!item.startDate) add("medium", "Experience", "{label}: add a start date.", { label })
+      if (!item.endDate && !item.current && item.startDate) add("low", "Experience", "{label}: add an end date or mark it as current.", { label })
+      if (!text) add("high", "Experience", "{label}: describe what you achieved.", { label })
       else {
-        if (!/\d/.test(text)) add("medium", "Experience", `${label}: add numbers (%, money, time, users) to show impact.`)
+        if (!/\d/.test(text)) add("medium", "Experience", "{label}: add numbers (%, money, time, users) to show impact.", { label })
         const bullets = (item.description.match(/<li/gi) ?? []).length
-        if (bullets > 7) add("low", "Experience", `${label}: ${bullets} bullet points. Keep the 3 to 6 strongest.`)
-        if (text.length > 1200) add("low", "Experience", `${label}: the description is long. Keep it scannable.`)
+        if (bullets > 7) add("low", "Experience", "{label}: {n} bullet points. Keep the 3 to 6 strongest.", { label, n: bullets })
+        if (text.length > 1200) add("low", "Experience", "{label}: the description is long. Keep it scannable.", { label })
       }
       const start = item.startDate.slice(0, 7)
       const end = item.endDate.slice(0, 7)
-      if (start && end && !item.current && end < start) add("high", "Experience", `${label}: the end date is before the start date.`)
+      if (start && end && !item.current && end < start) add("high", "Experience", "{label}: the end date is before the start date.", { label })
     })
   } else {
     add("high", "Experience", "Add a Professional Experience section.")
@@ -113,14 +123,14 @@ export function reviewResume(resume: Resume): ReviewIssue[] {
 
   const allText = collectText(resume).toLowerCase()
   const weak = WEAK_PHRASES.filter((w) => allText.includes(w))
-  if (weak.length) add("medium", "Wording", `Swap passive phrases for action verbs: ${weak.map((w) => `"${w}"`).join(", ")}.`)
+  if (weak.length) add("medium", "Wording", "Swap passive phrases for action verbs: {phrases}.", { phrases: weak.map((w) => `"${w}"`).join(", ") })
   const firstPerson = (allText.match(/\b(i|me|my)\b/g) ?? []).length
   if (firstPerson > 2) add("low", "Wording", "Avoid first person (I, me, my). Start bullets with a verb.")
 
   const skills = find(resume, "skills")
   const nSkills = skillCount(skills)
   if (nSkills === 0) add("high", "Skills", "List the skills the jobs you want ask for.")
-  else if (nSkills > 20) add("low", "Skills", `${nSkills} skills is a lot. Keep the 10 to 15 most relevant.`)
+  else if (nSkills > 20) add("low", "Skills", "{n} skills is a lot. Keep the 10 to 15 most relevant.", { n: nSkills })
 
   if (!find(resume, "education")) add("medium", "Education", "Add an Education section.")
 

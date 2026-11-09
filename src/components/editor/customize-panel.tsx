@@ -109,7 +109,8 @@ function TemplateTab() {
 }
 
 function TemplateCard({ resume, id }: { resume: Resume; id: string }) {
-  const meta = TEMPLATES.find((t) => t.id === id)!
+  const t = useT()
+  const meta = TEMPLATES.find((entry) => entry.id === id)!
   const active = resume.settings.template === id
   // Show the user's own content in every thumbnail.
   const preview = useMemo(
@@ -154,7 +155,7 @@ function TemplateCard({ resume, id }: { resume: Resume; id: string }) {
           ) : null}
         </div>
       </div>
-      <p className="line-clamp-2 text-xs text-muted-foreground">{meta.description}</p>
+      <p className="line-clamp-2 text-xs text-muted-foreground">{t(meta.description)}</p>
     </button>
   )
 }

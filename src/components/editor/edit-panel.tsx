@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 
-import { useT } from "@/components/app/i18n-provider"
+import { useT, useUiLocale } from "@/components/app/i18n-provider"
 import { Sortable, SortableItem, SortableItemHandle } from "@/components/reui/sortable"
 import { Button } from "@/components/ui/button"
 import {
@@ -120,7 +120,7 @@ export function EditPanel() {
             style={{ width: `${score}%` }}
           />
         </div>
-        {missing.length ? <p className="mt-2 text-xs text-muted-foreground">{t("Next: {item}", { item: missing[0] })}</p> : null}
+        {missing.length ? <p className="mt-2 text-xs text-muted-foreground">{t("Next: {item}", { item: t(missing[0]) })}</p> : null}
       </div>
 
       <CardDefaults.Provider value={fold.open}>
@@ -268,7 +268,7 @@ function SectionCard({ section }: { section: Section }) {
           </button>
         )
       }
-      description={preset.description}
+      description={t(preset.description)}
       actions={
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("Section options")} />}>
@@ -313,6 +313,7 @@ function SectionCard({ section }: { section: Section }) {
 
 function AddSection() {
   const t = useT()
+  const uiLocale = useUiLocale()
   const resume = useResume()
   const present = new Set(resume.sections.map((s) => s.type))
   const available = SECTION_PRESETS.filter((p) => !p.single || !present.has(p.type))
@@ -328,7 +329,9 @@ function AddSection() {
             onClick={() => updateResume((d) => void d.sections.push(createSection(preset.type)))}
           >
             <Plus className="text-primary" />
-            {preset.type.startsWith("custom") ? `${preset.titles.en} (${preset.kind === "text" ? "text" : preset.kind === "skills" ? "list" : "entries"})` : preset.titles.en}
+            {preset.type.startsWith("custom")
+              ? t(preset.kind === "text" ? "{name} (text)" : preset.kind === "skills" ? "{name} (list)" : "{name} (entries)", { name: preset.titles[uiLocale] })
+              : preset.titles[uiLocale]}
           </Button>
         ))}
       </div>

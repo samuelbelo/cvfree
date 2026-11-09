@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { Plus, Search } from "lucide-react"
 
-import { useT } from "@/components/app/i18n-provider"
+import { useT, useUiLocale } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,7 @@ export function PhraseDialog({
   onPick: (text: string) => void
 }) {
   const t = useT()
+  const uiLocale = useUiLocale()
   const lang = phraseLang(locale)
   const [family, setFamily] = useState(PHRASE_FAMILIES[0].id)
   const [query, setQuery] = useState("")
@@ -66,7 +67,7 @@ export function PhraseDialog({
                   family === f.id && "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
                 )}
               >
-                {f.label[lang]}
+                {f.label[uiLocale === "pt-BR" ? "pt" : "en"]}
               </button>
             ))}
           </div>

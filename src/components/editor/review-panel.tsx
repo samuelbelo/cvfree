@@ -6,7 +6,7 @@ import { toast } from "sonner"
 
 import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
-import { completeness, reviewResume, type ReviewIssue } from "@/lib/resume/analysis"
+import { completeness, reviewResume, UNNAMED_JOB, type ReviewIssue } from "@/lib/resume/analysis"
 import { cn } from "@/lib/utils"
 import { useResume } from "@/store/editor-store"
 
@@ -75,11 +75,11 @@ export function ReviewPanel({ aiEnabled }: { aiEnabled: boolean }) {
         ) : (
           Object.entries(grouped).map(([area, list]) => (
             <div key={area} className="grid gap-1.5">
-              <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{area}</div>
+              <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t(area)}</div>
               {list.map((issue) => (
                 <div key={issue.id} className="flex items-start gap-2 text-sm">
                   <span className="mt-0.5">{ICON[issue.severity]}</span>
-                  <span>{issue.message}</span>
+                  <span>{t(issue.text, issue.vars?.label === UNNAMED_JOB ? { ...issue.vars, label: t(UNNAMED_JOB) } : issue.vars)}</span>
                 </div>
               ))}
             </div>

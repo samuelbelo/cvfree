@@ -224,7 +224,7 @@ export function buildServer(): McpServer {
       inputSchema: z.object({ id }),
       annotations: READ,
     },
-    async ({ id: resumeId }) => withResume(resumeId, (r) => ok({ ...completeness(r), issues: reviewResume(r) }))
+    async ({ id: resumeId }) => withResume(resumeId, (r) => ok({ ...completeness(r), issues: reviewResume(r).map(({ id, severity, area, message }) => ({ id, severity, area, message })) }))
   )
 
   server.registerTool(

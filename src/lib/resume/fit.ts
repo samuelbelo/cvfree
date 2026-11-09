@@ -1,4 +1,5 @@
 import type { ResumeSettings } from "./schema"
+import type { Translate } from "@/lib/ui/translate"
 
 /*
  * "Fit to one page": the same resume with less air. tighten(settings, 0) is the
@@ -67,14 +68,14 @@ export function loosestFit(settings: ResumeSettings, fits: (candidate: ResumeSet
 }
 
 /** What changed, in words, for the confirmation message. */
-export function describeFit(before: ResumeSettings, after: ResumeSettings): string {
+export function describeFit(before: ResumeSettings, after: ResumeSettings, t: Translate): string {
   const parts: string[] = []
-  if (after.fontSize.body !== before.fontSize.body) parts.push(`body text ${after.fontSize.body} pt`)
-  if (after.lineHeight !== before.lineHeight) parts.push(`line height ${Math.round(after.lineHeight * 100)}%`)
+  if (after.fontSize.body !== before.fontSize.body) parts.push(t("body text {size} pt", { size: after.fontSize.body }))
+  if (after.lineHeight !== before.lineHeight) parts.push(t("line height {percent}%", { percent: Math.round(after.lineHeight * 100) }))
   if (after.page.marginY !== before.page.marginY || after.page.marginX !== before.page.marginX) {
-    parts.push(`margins ${after.page.marginY} and ${after.page.marginX} mm`)
+    parts.push(t("margins {y} and {x} mm", { y: after.page.marginY, x: after.page.marginX }))
   }
   const gaps = (["section", "title", "block", "inside"] as const).some((k) => after.spacing[k] !== before.spacing[k])
-  if (gaps) parts.push("tighter spacing")
+  if (gaps) parts.push(t("tighter spacing"))
   return parts.join(", ")
 }

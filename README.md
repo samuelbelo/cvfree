@@ -22,6 +22,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Tailor.** Paste a job link or description, get a keyword match score and add missing skills in one click. Save a tailored copy.
 - **Optional AI** review and tailoring with any OpenAI-compatible API, including a local Ollama.
 - **Resume language** for section titles and dates: English, Portuguese, Spanish, French, German.
+- **Interface in English or Brazilian Portuguese.** Pick it in Settings. It is a separate choice from the language of each resume, so you can write an English resume in a Portuguese app.
 - **Public link.** One click gives a resume a read-only address you can send to a recruiter, with PDF and Word download. Revoke it any time.
 - **Cover letters.** One per application, created from a resume so name, contact details, fonts and color already match. Greeting, date and sign-off follow the letter's language. PDF, Word and text export, and an optional AI first draft from the posting.
 - **Help me write.** Sentence starters for the summary and for job bullets, by role family, in English and Portuguese. Every name and number is a placeholder in brackets: the shape is given, the facts are yours.
@@ -102,7 +103,7 @@ The Share button in the editor gives the resume a read-only address like `https:
 
 ### Settings
 
-Defaults for new resumes (template, language and color), and a status panel that shows where data is stored, which browser renders PDFs, and whether AI, the password and the MCP endpoint are on.
+Defaults for new resumes (template, language and color), the language of the app itself, and a status panel that shows where data is stored, which browser renders PDFs, and whether AI, the password and the MCP endpoint are on.
 
 ![Settings page](docs/screenshots/settings.png)
 
@@ -260,6 +261,15 @@ pnpm build && pnpm start
 3. Register it in `src/templates/registry.ts` with a name, tags and default fonts.
 
 It then shows up in the template picker with a live thumbnail.
+
+## Adding an interface language
+
+The English text is the key, so the code reads `t("Save")` and a sentence with no translation yet shows in English instead of breaking.
+
+1. Copy `src/lib/ui/pt-BR.ts` to a new file and translate the values. Keep the `{name}` markers, they are filled in at run time.
+2. Add the language to `UI_LOCALES`, `UI_LOCALE_NAMES` and `DICTIONARIES` in `src/lib/ui/translate.ts`.
+
+It then shows up in the language list on the Settings page. The resume templates are not part of this: their section titles and dates follow the language of each resume.
 
 ## License
 

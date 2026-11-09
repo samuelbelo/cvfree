@@ -491,4 +491,154 @@ export const PT_BR: Record<string, string> = {
   Left: "Esquerda",
   Right: "Direita",
   "Align center": "Centralizar",
+
+  // Cover letter editor
+  "This letter was changed in another tab or window. Reload to see it. Your edits here will not be saved.":
+    "Esta carta foi alterada em outra aba ou janela. Recarregue para ver. O que você editar aqui não será salvo.",
+  "The resume this letter came from no longer exists.": "O currículo que deu origem a esta carta não existe mais.",
+  "Sender details and style copied from the resume": "Dados de contato e estilo copiados do currículo",
+  "Draft written. Read it as the recruiter would, then make it yours.":
+    "Rascunho pronto. Leia como quem recruta leria e depois deixe com a sua cara.",
+  "AI failed": "A IA falhou",
+  "Letter name": "Nome da carta",
+  "Letter language": "Idioma da carta",
+  'Cover letter · from "{title}"': 'Carta de apresentação · a partir de "{title}"',
+  "Cover letter": "Carta de apresentação",
+  You: "Você",
+  "From resume": "Do currículo",
+  "City, country": "Cidade, país",
+  "Website or LinkedIn": "Site ou LinkedIn",
+  "Who you are writing to": "Para quem você escreve",
+  "Position you apply for": "Vaga pretendida",
+  "Hiring manager": "Responsável pela vaga",
+  "Leave empty if you do not know": "Deixe em branco se não souber",
+  Optional: "Opcional",
+  Letter: "Carta",
+  "Write with AI": "Escrever com IA",
+  Date: "Data",
+  Greeting: "Saudação",
+  "Why this role, what you bring, one result you are proud of, and how to reach you. Three or four short paragraphs.":
+    "Por que esta vaga, o que você oferece, um resultado que dá orgulho e como falar com você. Três ou quatro parágrafos curtos.",
+  "Recruiters read about 250 to 400 words. Numbers beat adjectives.":
+    "Quem recruta lê de 250 a 400 palavras. Números valem mais que adjetivos.",
+  "{n} words": "{n} palavras",
+  "Sign-off": "Despedida",
+  Style: "Estilo",
+  "Fonts, sizes and margins follow the resume the letter was made from. Use “From resume” above to copy them again after changing the resume.":
+    "Fontes, tamanhos e margens seguem o currículo que deu origem à carta. Use “Do currículo” acima para copiar tudo de novo depois de mudar o currículo.",
+  "Write a first draft with AI": "Escrever um primeiro rascunho com IA",
+  "Paste the job posting. The draft uses only what is in your resume and replaces the current text. You then edit it like any text. The posting and your resume are sent to the AI provider configured on this server.":
+    "Cole o anúncio da vaga. O rascunho usa só o que está no seu currículo e substitui o texto atual. Depois você edita como qualquer texto. O anúncio e o seu currículo são enviados ao provedor de IA configurado neste servidor.",
+  "Job posting...": "Anúncio da vaga...",
+  "Write draft": "Escrever rascunho",
+
+  // Public link page
+  "{name} – resume": "{name} – currículo",
+  "Made with {cvfree}, the open-source resume builder.": "Feito com {cvfree}, o criador de currículos de código aberto.",
+  "This link is not valid any more": "Este link não vale mais",
+  "The person who shared this resume may have revoked the link, or the address was copied incompletely. Ask them for a new one.":
+    "Quem compartilhou este currículo pode ter revogado o link, ou o endereço foi copiado pela metade. Peça um novo.",
+  "Made with cvfree, the open-source resume builder": "Feito com cvfree, o criador de currículos de código aberto",
+
+  // Editor: add a section
+  "{name} (text)": "{name} (texto)",
+  "{name} (list)": "{name} (lista)",
+  "{name} (entries)": "{name} (itens)",
+
+  // Editor: what fit to one page changed
+  "body text {size} pt": "texto em {size} pt",
+  "line height {percent}%": "entrelinha de {percent}%",
+  "margins {y} and {x} mm": "margens de {y} e {x} mm",
+  "tighter spacing": "espaçamento menor",
+
+  // Editor: review areas
+  Contact: "Contato",
+  Header: "Cabeçalho",
+  Summary: "Resumo",
+  Experience: "Experiência",
+  Wording: "Redação",
+
+  // Editor: review checks
+  "Recruiters need an email address to reach you.": "Quem recruta precisa de um e-mail para falar com você.",
+  "Add a phone number. Many recruiters call first.": "Adicione um telefone. Muita gente de recrutamento liga primeiro.",
+  "The email address looks invalid.": "O e-mail parece inválido.",
+  "Add a target job title under your name.": "Adicione o cargo que você busca logo abaixo do nome.",
+  "Write a short professional summary.": "Escreva um resumo profissional curto.",
+  "Your summary has {n} characters. Two to four sentences, 200 to 600 characters, read well.":
+    "Seu resumo tem {n} caracteres. De duas a quatro frases, entre 200 e 600 caracteres, é o que funciona melhor.",
+  "Your summary has {n} characters. Trimming it to about 600 keeps it scannable.":
+    "Seu resumo tem {n} caracteres. Cortar para perto de 600 deixa a leitura rápida.",
+  "Add your work experience, most recent first.": "Adicione sua experiência profissional, da mais recente para a mais antiga.",
+  "{label}: add a start date.": "{label}: adicione a data de início.",
+  "{label}: add an end date or mark it as current.": "{label}: adicione a data de saída ou marque como atual.",
+  "{label}: describe what you achieved.": "{label}: descreva o que você conquistou.",
+  "{label}: add numbers (%, money, time, users) to show impact.":
+    "{label}: adicione números (%, dinheiro, tempo, usuários) para mostrar impacto.",
+  "{label}: {n} bullet points. Keep the 3 to 6 strongest.": "{label}: {n} tópicos. Fique com os 3 a 6 mais fortes.",
+  "{label}: the description is long. Keep it scannable.": "{label}: a descrição está longa. Deixe fácil de ler por alto.",
+  "{label}: the end date is before the start date.": "{label}: a data de saída é anterior à de início.",
+  "Add a Professional Experience section.": "Adicione uma seção de Experiência Profissional.",
+  "Swap passive phrases for action verbs: {phrases}.": "Troque expressões passivas por verbos de ação: {phrases}.",
+  "Avoid first person (I, me, my). Start bullets with a verb.":
+    "Evite a primeira pessoa (eu, meu, minha). Comece cada tópico com um verbo.",
+  "List the skills the jobs you want ask for.": "Liste as habilidades que as vagas que você quer pedem.",
+  "{n} skills is a lot. Keep the 10 to 15 most relevant.": "{n} habilidades é muita coisa. Fique com as 10 a 15 mais relevantes.",
+  "Add an Education section.": "Adicione uma seção de Formação.",
+  "A job": "Um cargo",
+
+  // Editor: next step tips
+  "Add your name": "Adicione seu nome",
+  "Add a job title": "Adicione um cargo",
+  "Add an email": "Adicione um e-mail",
+  "Add a phone number": "Adicione um telefone",
+  "Add your city or country": "Adicione sua cidade ou país",
+  "Write a summary of at least 200 characters": "Escreva um resumo com pelo menos 200 caracteres",
+  "Add at least one job": "Adicione pelo menos um cargo",
+  "Describe what you did in your jobs": "Descreva o que você fez em cada cargo",
+  "Add your education": "Adicione sua formação",
+  "List at least 5 skills": "Liste pelo menos 5 habilidades",
+  "Add the languages you speak": "Adicione os idiomas que você fala",
+  "Add a link (LinkedIn, GitHub, portfolio)": "Adicione um link (LinkedIn, GitHub, portfólio)",
+
+  // Editor: section hints
+  "Two to four sentences about who you are and what you do best.": "De duas a quatro frases sobre quem você é e o que faz de melhor.",
+  "Recent roles first. Lead with results, ideally with numbers.":
+    "Cargos mais recentes primeiro. Comece pelos resultados, de preferência com números.",
+  "Degrees and schools, most recent first.": "Cursos e instituições, do mais recente para o mais antigo.",
+  "Pick the skills the job listing asks for.": "Escolha as habilidades que o anúncio da vaga pede.",
+  "Languages you speak and how well.": "Idiomas que você fala e em que nível.",
+  "Portfolio, GitHub, LinkedIn and other profiles.": "Portfólio, GitHub, LinkedIn e outros perfis.",
+  "Your best wins in a few bullet points.": "Suas melhores conquistas em poucos tópicos.",
+  "Side projects, open source and notable work.": "Projetos paralelos, código aberto e trabalhos de destaque.",
+  "Professional certificates and licenses.": "Certificados e licenças profissionais.",
+  "Training and professional courses.": "Treinamentos e cursos profissionais.",
+  "Internships and apprenticeships.": "Estágios e programas de aprendizagem.",
+  "Volunteer work and community roles.": "Trabalho voluntário e atuação na comunidade.",
+  "Clubs, sports and student organizations.": "Clubes, esportes e organizações estudantis.",
+  "Talks you gave, panels you sat on, events you organised.": "Palestras que você deu, painéis de que participou, eventos que organizou.",
+  "Professional bodies, communities and boards you belong to.": "Entidades de classe, comunidades e conselhos de que você faz parte.",
+  "Prizes and recognition.": "Prêmios e reconhecimentos.",
+  "Papers, articles and talks.": "Artigos, publicações e palestras.",
+  "A short line about what you like doing.": "Uma linha curta sobre o que você gosta de fazer.",
+  "People who can vouch for your work.": "Pessoas que podem falar do seu trabalho.",
+  "Free text with your own title.": "Texto livre com o título que você quiser.",
+  "Entries with dates and descriptions.": "Itens com datas e descrições.",
+  "A second list of skills, tools or strengths.": "Uma segunda lista de habilidades, ferramentas ou pontos fortes.",
+
+  // Editor: template descriptions
+  "Classic single column with colored rules. Safe for any application.":
+    "Coluna única clássica com linhas coloridas. Serve para qualquer candidatura.",
+  "Traditional serif layout, centered header and framed titles.": "Layout tradicional com serifa, cabeçalho centralizado e títulos emoldurados.",
+  "No decoration at all. Built for applicant tracking systems.": "Sem decoração nenhuma. Feito para sistemas de triagem de currículos.",
+  "Colored name, photo on the right, accent bars on section titles.": "Nome colorido, foto à direita e barras de destaque nos títulos das seções.",
+  "Section titles in a label column, content on the right.": "Títulos das seções em uma coluna de rótulos, conteúdo à direita.",
+  "Bold colored name and a compact contact grid.": "Nome colorido em negrito e uma grade compacta de contatos.",
+  "Uppercase colored titles and highlighted skill chips.": "Títulos coloridos em maiúsculas e habilidades em etiquetas destacadas.",
+  "Dates in a left gutter joined by a vertical line.": "Datas em uma faixa à esquerda, ligadas por uma linha vertical.",
+  "Heavy name block and filled section tags. Hard to miss.": "Bloco de nome pesado e etiquetas de seção preenchidas. Difícil passar batido.",
+  "Dark sidebar with photo and details. Personal and organized.": "Barra lateral escura com foto e dados. Pessoal e organizado.",
+  "Light tinted side column and a large name.": "Coluna lateral em tom claro e nome grande.",
+  "Centered header with photo and two columns split by hairlines.": "Cabeçalho centralizado com foto e duas colunas separadas por linhas finas.",
+  "Full-width color band header with a right side column.": "Cabeçalho em faixa colorida de ponta a ponta com coluna lateral à direita.",
+  "Two-tone two-column layout with a tinted side panel.": "Layout de duas colunas em dois tons com painel lateral colorido.",
 }

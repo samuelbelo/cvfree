@@ -57,7 +57,7 @@ function TextSectionEditor({ section }: { section: SectionOf<"text"> }) {
       <RichText
         value={section.html}
         onChange={(html) => update((s) => void (s.html = html))}
-        placeholder={preset.description}
+        placeholder={t(preset.description)}
         help={section.type === "summary" ? { kind: "summary", locale: resume.locale } : undefined}
       />
       {section.type === "summary" ? (

@@ -63,7 +63,7 @@ export function FitPageButton({ resume }: { resume: Resume }) {
           if (fitted) {
             apply(fitted)
             toast.success(t("Fits on one page"), {
-              description: describeFit(before, fitted) || undefined,
+              description: describeFit(before, fitted, t) || undefined,
               // Long enough to read what changed and still reach Undo.
               duration: 8000,
               action: { label: t("Undo"), onClick: () => useEditor.getState().undo() },
