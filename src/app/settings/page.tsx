@@ -1,4 +1,7 @@
+import { headers } from "next/headers"
+
 import { AppHeader } from "@/components/app/app-header"
+import { McpSetup } from "@/components/app/mcp-setup"
 import { SettingsForm } from "@/components/app/settings-form"
 import { getAppSettings } from "@/lib/server/app-settings"
 import { aiEnabled, config } from "@/lib/server/config"
@@ -9,6 +12,10 @@ export const dynamic = "force-dynamic"
 export default async function SettingsPage() {
   const settings = await getAppSettings()
   const chrome = findChrome()
+  const h = await headers()
+  const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim() || "http"
+  const endpoint = `${proto}://${h.get("host") ?? "localhost:3000"}/mcp`
+  const mcpState = config.mcpToken ? "token" : config.password ? "off" : "open"
   const status = [
     { label: "Data folder", value: config.dataDir, ok: true, hint: "Back this folder up to keep your resumes safe." },
     {
@@ -28,6 +35,12 @@ export default async function SettingsPage() {
       value: config.password ? "On" : "Off",
       ok: Boolean(config.password),
       hint: "Set CVFREE_PASSWORD before exposing the app on the internet.",
+    },
+    {
+      label: "MCP",
+      value: mcpState === "token" ? "On, token required" : mcpState === "open" ? "On, no token" : "Off",
+      ok: mcpState === "token",
+      hint: "Lets an AI assistant edit the resumes. See the MCP section below.",
     },
     { label: "Version", value: config.version, ok: true, hint: "" },
   ]
@@ -63,6 +76,11 @@ export default async function SettingsPage() {
             These values come from environment variables. Change them in your <code>.env</code> or{" "}
             <code>docker-compose.yml</code> and restart.
           </p>
+        </section>
+
+        <section className="rounded-xl border bg-card shadow-xs">
+          <h2 className="border-b px-5 py-3 font-semibold">MCP</h2>
+          <McpSetup endpoint={endpoint} state={mcpState} />
         </section>
       </main>
     </div>
