@@ -10,6 +10,8 @@ import type { Locale, Resume, ResumeSettings } from "@/lib/resume/schema"
 import { chromeEdge, ResumeDocument } from "@/templates/resume-document"
 import { MM_TO_PX, PAGE_SIZE } from "@/templates/style"
 
+import { FitPageButton } from "./fit-page"
+
 /** Track an element's size. */
 function useSize<T extends HTMLElement>() {
   const ref = useRef<T>(null)
@@ -46,7 +48,12 @@ function pageLabel(settings: ResumeSettings, locale: Locale, n: number, total: n
 /** Live preview of a resume. */
 export function Preview({ resume, className }: { resume: Resume; className?: string }) {
   return (
-    <PagePreview settings={resume.settings} locale={resume.locale} className={className}>
+    <PagePreview
+      settings={resume.settings}
+      locale={resume.locale}
+      className={className}
+      extra={(pages) => (pages > 1 ? <FitPageButton resume={resume} /> : null)}
+    >
       <ResumeDocument resume={resume} />
     </PagePreview>
   )
@@ -61,11 +68,14 @@ export function PagePreview({
   settings,
   locale,
   className,
+  extra,
   children,
 }: {
   settings: ResumeSettings
   locale: Locale
   className?: string
+  /** Extra controls for the bar under the page, given the current page count. */
+  extra?: (pages: number) => ReactNode
   children: ReactNode
 }) {
   const [frameRef, frame] = useSize<HTMLDivElement>()
@@ -113,6 +123,7 @@ export function PagePreview({
         <span className="px-2 text-xs text-muted-foreground tabular-nums">
           {pages} {pages === 1 ? "page" : "pages"}
         </span>
+        {extra?.(pages)}
       </div>
     </div>
   )
