@@ -17,8 +17,14 @@ const DICTIONARIES: Record<UiLocale, Record<string, string>> = {
   "pt-BR": PT_BR,
 }
 
-const fill = (text: string, vars?: Vars) =>
-  vars ? text.replace(/\{(\w+)\}/g, (match, name: string) => (name in vars ? String(vars[name]) : match)) : text
+const fill = (text: string, vars: Vars | undefined, number: Intl.NumberFormat) =>
+  vars
+    ? text.replace(/\{(\w+)\}/g, (match, name: string) => {
+        if (!(name in vars)) return match
+        const value = vars[name]
+        return typeof value === "number" ? number.format(value) : value
+      })
+    : text
 
 /**
  * The English text is the key, so a component reads the same with or without a translation.
@@ -26,5 +32,7 @@ const fill = (text: string, vars?: Vars) =>
  */
 export function translator(locale: UiLocale): Translate {
   const dictionary = DICTIONARIES[locale]
-  return (text, vars) => fill(dictionary[text] ?? text, vars)
+  // Numbers follow the language too: 10.5 mm in English is 10,5 mm in Portuguese. No grouping, so a year stays 2024.
+  const number = new Intl.NumberFormat(locale, { useGrouping: false, maximumFractionDigits: 2 })
+  return (text, vars) => fill(dictionary[text] ?? text, vars, number)
 }
