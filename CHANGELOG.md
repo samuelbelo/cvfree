@@ -1,3 +1,23 @@
+## [0.6.0](https://github.com/samuelbelo/cvfree/compare/v0.5.0...v0.6.0) (2026-11-09)
+
+### Features
+
+* download a full backup of resumes, letters and settings as a zip ([7807c80](https://github.com/samuelbelo/cvfree/commit/7807c8001b94a75b19306c48bd58038675f7d4b4))
+* fit to one page button that tightens spacing, margins and font sizes until the resume fits ([22d26ca](https://github.com/samuelbelo/cvfree/commit/22d26ca5446ff0cd1b4479a00e98febeec484fe4))
+* import a LinkedIn data export zip ([28bfd90](https://github.com/samuelbelo/cvfree/commit/28bfd90c59c755da75dacaf5f317ae4881293da4))
+* import and export JSON Resume files (jsonresume.org) ([990adb1](https://github.com/samuelbelo/cvfree/commit/990adb1c45fcb99c9aa4fa6f386363de5e6ef567))
+* restore a backup zip from the Settings page ([01204aa](https://github.com/samuelbelo/cvfree/commit/01204aa4805dc4d3fa70d6b4a55095887e8e18a6))
+* show the app in Brazilian Portuguese, starting with the dashboard and settings ([190b572](https://github.com/samuelbelo/cvfree/commit/190b572c481bd931733cebaf855adcbcc5bc035d))
+* translate cover letters, public link and review tips to Brazilian Portuguese ([035d154](https://github.com/samuelbelo/cvfree/commit/035d1546840748b31f1d2ab4504c4c844a1b870f))
+* translate the resume editor to Brazilian Portuguese ([1e4cfef](https://github.com/samuelbelo/cvfree/commit/1e4cfef0bff0d8d7de793fb8493c147dda39ec26))
+
+### Fixes
+
+* escape quotes and brackets in the download file name ([0e6dc05](https://github.com/samuelbelo/cvfree/commit/0e6dc054450fb0f379f0b5b04946caca1b64a40f))
+* name new resumes, letters and copies in the interface language ([17dc653](https://github.com/samuelbelo/cvfree/commit/17dc653ae083350af732d4a441372b525ba07667))
+* show the Bold template as Marquee, a name no other resume builder uses for a template ([6f020a5](https://github.com/samuelbelo/cvfree/commit/6f020a515ccc9f6e5edcb12f01698b563f668f24))
+* write decimals the way the interface language does ([a25602c](https://github.com/samuelbelo/cvfree/commit/a25602c926d6261f0a6385f3bc4ac68dee47f3df))
+
 ## [0.5.0](https://github.com/samuelbelo/cvfree/compare/v0.4.0...v0.5.0) (2026-11-09)
 
 ### Features
