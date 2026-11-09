@@ -12,5 +12,7 @@ export function contentDisposition(disposition: "attachment" | "inline", base: s
     .replace(/\s+/g, "_")
   const utf8 = (trimmed || "resume").replace(/\s/g, "_")
   const fallback = `${ascii || "resume"}.${ext}`
-  return `${disposition}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(`${utf8}.${ext}`)}`
+  // encodeURIComponent lets a quote and brackets through, and the quote is the separator of this header.
+  const encoded = encodeURIComponent(`${utf8}.${ext}`).replace(/['()]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)
+  return `${disposition}; filename="${fallback}"; filename*=UTF-8''${encoded}`
 }
