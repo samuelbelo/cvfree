@@ -17,6 +17,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Exports.** Pixel-exact PDF (headless Chromium), DOCX, TXT and a JSON backup you can import again.
 - **One-click backup.** Download every resume, cover letter and the settings as one zip from Settings, and restore it on any install.
 - **JSON Resume in and out.** Import a [JSON Resume](https://jsonresume.org) file from another tool, or export one to take your content elsewhere.
+- **LinkedIn import.** Upload the zip LinkedIn gives you under *Get a copy of your data* and start from a resume that already holds your positions, education, skills and languages.
 - **Review.** Completeness score and instant writing checks (missing dates, no numbers, passive phrases, summary length...).
 - **Tailor.** Paste a job link or description, get a keyword match score and add missing skills in one click. Save a tailored copy.
 - **Optional AI** review and tailoring with any OpenAI-compatible API, including a local Ollama.
@@ -35,9 +36,21 @@ Every person, company and link in these screenshots is made up.
 
 ### Dashboard
 
-All your resumes, each with a live thumbnail of its current template. Create a blank one, start from a filled-in example, or import a JSON file, either a cvfree backup or a JSON Resume file. The menu on each card renames, duplicates, downloads or deletes it.
+All your resumes, each with a live thumbnail of its current template. Create a blank one, start from a filled-in example, or use Import to bring in a JSON file (a cvfree backup or a JSON Resume file) or your LinkedIn profile. The menu on each card renames, duplicates, downloads or deletes it.
 
 ![Dashboard with three resumes in different templates](docs/screenshots/dashboard.png)
+
+### Import from LinkedIn
+
+LinkedIn lets you download your own profile as a zip, and cvfree turns that zip into a resume.
+
+1. On LinkedIn, open **Settings & Privacy → Data privacy → Get a copy of your data**.
+2. Pick the larger archive, or at least Profile, Positions, Education, Skills and Languages, and request it. LinkedIn sends an email when the zip is ready. A small selection takes minutes, the full archive can take a day.
+3. On the cvfree dashboard, choose **Import → LinkedIn profile** and pick the zip.
+
+The import reads the profile (name, headline, summary, location and websites), positions, education, skills, languages, certifications, projects, honors, publications, volunteering, courses, the primary email and the first phone number. The rest of the archive, such as connections, messages and ad data, is skipped and never stored. The zip is read in memory on your server and nothing of it is kept besides the new resume.
+
+It always creates a new resume, so nothing you already have changes. Skills arrive without a level, since LinkedIn does not record one. A LinkedIn profile is longer than a resume should be, so read it through and cut.
 
 ### Editor
 

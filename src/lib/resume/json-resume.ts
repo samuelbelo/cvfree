@@ -174,7 +174,7 @@ const strings = (v: unknown) => (Array.isArray(v) ? v.map(str).filter(Boolean) :
 /** "2020-03-15" and "2020-03" become "2020-03", "2020" stays, anything else is dropped. */
 const month = (v: unknown) => /^(\d{4})(?:-(\d{2}))?/.exec(str(v))?.[0] ?? ""
 
-const rich = (summary: string, highlights: string[] = []) =>
+export const rich = (summary: string, highlights: string[] = []) =>
   textToHtml([summary, highlights.map((h) => `- ${h.replace(/\s*\n\s*/g, " ")}`).join("\n")].filter(Boolean).join("\n\n"))
 
 /** Level words to the 1 to 5 scale. Knows this app's own labels in every language, plus the usual English ones. */
@@ -190,7 +190,7 @@ function levelTable(key: "skillLevels" | "languageLevels", extra: Record<string,
 }
 
 const skillLevel = levelTable("skillLevels", { master: 5, advanced: 4, intermediate: 3, basic: 1 })
-const languageLevel = levelTable("languageLevels", {
+export const languageLevel = levelTable("languageLevels", {
   bilingual: 5,
   "mother tongue": 5,
   "full professional": 4,

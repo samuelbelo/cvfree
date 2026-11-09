@@ -3,7 +3,7 @@
 import { useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Copy, Download, FilePlus2, FileUp, Mail, Merge, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
+import { Copy, Download, FileArchive, FileBraces, FilePlus2, FileUp, Mail, Merge, MoreVertical, Pencil, Sparkles, Trash2, TriangleAlert } from "lucide-react"
 import { toast } from "sonner"
 
 import { CombineDialog } from "@/components/app/combine-dialog"
@@ -33,6 +33,9 @@ import { completeness } from "@/lib/resume/analysis"
 import type { Resume } from "@/lib/resume/schema"
 import { getTemplate } from "@/templates/registry"
 
+/** Same limit as the server, checked here so a huge file fails before the upload. */
+const MAX_UPLOAD = 100 * 1024 * 1024
+
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...init })
   const data = await res.json().catch(() => ({}))
@@ -53,6 +56,7 @@ export function Dashboard({
 }) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
+  const zipInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [toDelete, setToDelete] = useState<Resume | null>(null)
   const [toRename, setToRename] = useState<Resume | null>(null)
@@ -69,8 +73,28 @@ export function Dashboard({
     }
   }
 
+  const importLinkedin = async (file: File) => {
+    if (file.size > MAX_UPLOAD) {
+      toast.error("This file is larger than the 100 MB this app accepts")
+      return
+    }
+    setBusy(true)
+    try {
+      const res = await fetch("/api/import/linkedin", { method: "POST", headers: { "Content-Type": "application/zip" }, body: file })
+      const data = (await res.json().catch(() => null)) as { id?: string; error?: string } | null
+      if (!res.ok || !data?.id) throw new Error(data?.error || `Import failed (${res.status})`)
+      toast.success("LinkedIn profile imported", { description: "Read it through and trim what a resume does not need.", duration: 8000 })
+      router.push(`/resumes/${data.id}`)
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Import failed", { duration: 10000 })
+      setBusy(false)
+    }
+  }
+
   const importFile = async (file?: File) => {
     if (!file) return
+    // Either menu entry takes either file, so a zip picked under "JSON file" still works.
+    if (/\.zip$/i.test(file.name) || /zip/i.test(file.type)) return importLinkedin(file)
     try {
       const json = JSON.parse(await file.text())
       const data = json?.resume ?? json
@@ -132,9 +156,27 @@ export function Dashboard({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => fileInput.current?.click()} disabled={busy}>
-            <FileUp /> Import JSON
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="outline" disabled={busy} />}>
+              <FileUp /> Import
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuItem className="items-start" onClick={() => fileInput.current?.click()}>
+                <FileBraces className="mt-0.5" />
+                <span className="grid gap-0.5">
+                  JSON file
+                  <span className="text-xs text-muted-foreground">A cvfree backup or a JSON Resume file</span>
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="items-start" onClick={() => zipInput.current?.click()}>
+                <FileArchive className="mt-0.5" />
+                <span className="grid gap-0.5">
+                  LinkedIn profile
+                  <span className="text-xs text-muted-foreground">The zip from Get a copy of your data</span>
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="outline" onClick={() => create("sample")} disabled={busy}>
             <Sparkles /> Start from example
           </Button>
@@ -145,6 +187,18 @@ export function Dashboard({
             ref={fileInput}
             type="file"
             accept="application/json,.json"
+            aria-label="JSON file to import"
+            hidden
+            onChange={(e) => {
+              void importFile(e.target.files?.[0])
+              e.target.value = ""
+            }}
+          />
+          <input
+            ref={zipInput}
+            type="file"
+            accept=".zip,application/zip"
+            aria-label="LinkedIn archive to import"
             hidden
             onChange={(e) => {
               void importFile(e.target.files?.[0])
