@@ -78,7 +78,7 @@ export function Dashboard({
       toast.success("Resume imported")
       router.push(`/resumes/${created.id}`)
     } catch {
-      toast.error("That file is not a cvfree JSON backup")
+      toast.error("That file is not a cvfree backup or a JSON Resume file")
     }
   }
 

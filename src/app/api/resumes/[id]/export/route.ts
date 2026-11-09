@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { fullName } from "@/lib/resume/format"
+import { toJsonResume } from "@/lib/resume/json-resume"
 import { resumeToText } from "@/lib/resume/text-export"
 import { renderDocx } from "@/lib/server/docx"
 import { contentDisposition } from "@/lib/server/download"
@@ -12,7 +13,7 @@ export const maxDuration = 60
 
 type Ctx = { params: Promise<{ id: string }> }
 
-/** GET /api/resumes/:id/export?format=pdf|docx|txt|json */
+/** GET /api/resumes/:id/export?format=pdf|docx|txt|json|jsonresume */
 export async function GET(request: Request, { params }: Ctx) {
   const { id } = await params
   const resume = await getResume(id)
@@ -45,6 +46,10 @@ export async function GET(request: Request, { params }: Ctx) {
       case "json":
         return new Response(JSON.stringify({ cvfree: 1, resume }, null, 2), {
           headers: headers("application/json", "cvfree.json"),
+        })
+      case "jsonresume":
+        return new Response(JSON.stringify(toJsonResume(resume), null, 2), {
+          headers: headers("application/json", "resume.json"),
         })
       default:
         return NextResponse.json({ error: `Unknown format ${format}` }, { status: 400 })

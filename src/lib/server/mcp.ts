@@ -11,6 +11,7 @@ import { createSection, createSkillItem, createTimelineItem, emptyResume, newId,
 import { fullName } from "@/lib/resume/format"
 import { SECTION_PRESETS } from "@/lib/resume/presets"
 import { FONT_IDS, LOCALES, settingsSchema, type Resume, type Section } from "@/lib/resume/schema"
+import { toJsonResume } from "@/lib/resume/json-resume"
 import { resumeToText } from "@/lib/resume/text-export"
 import { textToHtml } from "@/lib/resume/text-to-html"
 import { TEMPLATES } from "@/templates/registry"
@@ -514,8 +515,9 @@ export function buildServer(): McpServer {
   server.registerTool(
     "export_resume",
     {
-      description: "Export as PDF, Word, plain text or the JSON backup. PDF and DOCX come back as a base64 file.",
-      inputSchema: z.object({ id, format: exportFormat.default("pdf") }),
+      description:
+        "Export as PDF, Word, plain text, the JSON backup or JSON Resume (jsonresume.org, content only, for other tools). PDF and DOCX come back as a base64 file.",
+      inputSchema: z.object({ id, format: z.enum([...exportFormat.options, "jsonresume"]).default("pdf") }),
       annotations: READ,
     },
     async ({ id: resumeId, format }) =>
@@ -533,6 +535,8 @@ export function buildServer(): McpServer {
             )
           case "txt":
             return ok(resumeToText(r))
+          case "jsonresume":
+            return ok(toJsonResume(r))
           default:
             return ok({ cvfree: 1, resume: r })
         }

@@ -168,12 +168,12 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
     )
   }
 
-  const download = async (format: "pdf" | "docx" | "txt" | "json") => {
+  const download = async (format: "pdf" | "docx" | "txt" | "json" | "jsonresume") => {
     await flush()
     if (format === "docx" && !getTemplate(resume.settings.template).tags.includes("docx")) {
       toast.info("Word export uses a clean single-column layout for this template.")
     }
-    const id = toast.loading(`Preparing ${format.toUpperCase()}...`)
+    const id = toast.loading(`Preparing ${format === "jsonresume" ? "JSON Resume" : format.toUpperCase()}...`)
     try {
       const res = await fetch(`/api/resumes/${resume.id}/export?format=${format}`)
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `Export failed (${res.status})`)
@@ -254,6 +254,9 @@ export function EditorShell({ initial, aiEnabled }: { initial: Resume; aiEnabled
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => download("json")}>
                 <FileJson className="text-amber-600" /> Backup (JSON)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => download("jsonresume")}>
+                <FileJson className="text-emerald-600" /> JSON Resume
               </DropdownMenuItem>
               <DropdownMenuItem onClick={print}>
                 <Printer /> Print from browser

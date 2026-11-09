@@ -15,6 +15,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Photo upload** with a crop dialog. Stored inside the resume, so backups are self-contained.
 - **Header, footer and page numbers** (1, 1/3 or Page 1 of 3) on every PDF page.
 - **Exports.** Pixel-exact PDF (headless Chromium), DOCX, TXT and a JSON backup you can import again.
+- **JSON Resume in and out.** Import a [JSON Resume](https://jsonresume.org) file from another tool, or export one to take your content elsewhere.
 - **Review.** Completeness score and instant writing checks (missing dates, no numbers, passive phrases, summary length...).
 - **Tailor.** Paste a job link or description, get a keyword match score and add missing skills in one click. Save a tailored copy.
 - **Optional AI** review and tailoring with any OpenAI-compatible API, including a local Ollama.
@@ -33,13 +34,13 @@ Every person, company and link in these screenshots is made up.
 
 ### Dashboard
 
-All your resumes, each with a live thumbnail of its current template. Create a blank one, start from a filled-in example, or import a JSON backup. The menu on each card renames, duplicates, downloads or deletes it.
+All your resumes, each with a live thumbnail of its current template. Create a blank one, start from a filled-in example, or import a JSON file, either a cvfree backup or a JSON Resume file. The menu on each card renames, duplicates, downloads or deletes it.
 
 ![Dashboard with three resumes in different templates](docs/screenshots/dashboard.png)
 
 ### Editor
 
-The form is on the left and the page is on the right. There is no save button: changes show up in the preview as you type and are saved a moment later. The bar on top shows how complete the resume is. Sections fold, can be dragged into a new order, renamed, hidden or moved to the other column. The Download menu exports PDF, Word, plain text and a JSON backup.
+The form is on the left and the page is on the right. There is no save button: changes show up in the preview as you type and are saved a moment later. The bar on top shows how complete the resume is. Sections fold, can be dragged into a new order, renamed, hidden or moved to the other column. The Download menu exports PDF, Word, plain text, a JSON backup and a JSON Resume file.
 
 ### Templates
 
@@ -165,7 +166,7 @@ docker compose up -d
 
 The `chown` matters: the app runs as its own user inside the container and cannot write files the restore created as root.
 
-Each resume is also downloadable as JSON from the editor and can be imported from the dashboard, which is the quickest way to move one resume between installs.
+Each resume is also downloadable as JSON from the editor and can be imported from the dashboard, which is the quickest way to move one resume between installs. The backup keeps the template, colors and spacing. A JSON Resume file carries the content only, so it is the one to use with other tools.
 
 ## Configuration
 
