@@ -1,37 +1,11 @@
 import { NextResponse } from "next/server"
 
 import { SESSION_COOKIE, sessionToken } from "@/lib/auth"
+import { bump, clearFailures, clientKey, isLimited } from "@/lib/server/rate-limit"
 
-/*
- * Failed logins are counted per client address, and globally as a backstop
- * for spoofed forwarding headers. In-memory on purpose: one process, one
- * instance, and a restart clearing the counters is fine.
- */
-const WINDOW_MS = 15 * 60 * 1000
+/* Ten wrong passwords per client, two hundred in all, each within fifteen minutes. */
 const PER_CLIENT = 10
 const GLOBAL = 200
-const failures = new Map<string, { count: number; resetAt: number }>()
-
-function bump(key: string, limit: number): boolean {
-  const now = Date.now()
-  const entry = failures.get(key)
-  if (!entry || entry.resetAt < now) {
-    failures.set(key, { count: 1, resetAt: now + WINDOW_MS })
-    return false
-  }
-  entry.count++
-  return entry.count > limit
-}
-
-function isLimited(key: string, limit: number): boolean {
-  const entry = failures.get(key)
-  return Boolean(entry && entry.resetAt > Date.now() && entry.count >= limit)
-}
-
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-  return forwarded || request.headers.get("x-real-ip") || "direct"
-}
 
 export async function POST(request: Request) {
   const password = process.env.CVFREE_PASSWORD || ""
@@ -48,7 +22,7 @@ export async function POST(request: Request) {
     await new Promise((r) => setTimeout(r, 600))
     return NextResponse.json({ error: "Wrong password" }, { status: 401 })
   }
-  failures.delete(key)
+  clearFailures(key)
 
   const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim()
   const res = NextResponse.json({ ok: true })
