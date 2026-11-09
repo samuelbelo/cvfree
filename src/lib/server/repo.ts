@@ -194,6 +194,27 @@ export async function restoreSnapshot(id: string, at: string): Promise<Resume | 
   return restored
 }
 
+/**
+ * Put a resume from a backup in place as it was saved: its dates and share link
+ * are kept. Whatever file it replaces goes to the history first, readable or not.
+ */
+export async function restoreResume(resume: Resume): Promise<void> {
+  const file = fileFor(resume.id)
+  const current = await fs.readFile(file, "utf8").catch(() => null)
+  if (current !== null) {
+    let at = new Date().toISOString()
+    try {
+      const time = Date.parse(normalizeResume(JSON.parse(current)).updatedAt)
+      if (!Number.isNaN(time)) at = new Date(time).toISOString()
+    } catch {
+      // A file that cannot be read is still worth keeping a copy of.
+    }
+    await ensureDir(historyDir(resume.id))
+    await fs.writeFile(path.join(historyDir(resume.id), snapshotName(at)), current, "utf8")
+  }
+  await writeJsonAtomic(file, resume)
+}
+
 export async function deleteResume(id: string): Promise<boolean> {
   try {
     await fs.unlink(fileFor(id))

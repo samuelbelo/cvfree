@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   // The dev badge would otherwise show up in PDFs printed from a dev server.
   devIndicators: false,
   serverExternalPackages: ["puppeteer-core"],
+  experimental: {
+    // Request bodies pass through the proxy, which keeps only the first 10 MB by default.
+    // A backup with a few photos is larger than that. Keep in step with MAX_UPLOAD in api/backup.
+    proxyClientMaxBodySize: "100mb",
+  },
   async headers() {
     return [
       {

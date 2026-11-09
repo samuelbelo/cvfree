@@ -30,6 +30,18 @@ export async function getAppSettings(): Promise<AppSettings> {
   }
 }
 
+/** Settings from a backup, taken only while this instance has none of its own. */
+export async function restoreAppSettings(raw: unknown): Promise<boolean> {
+  if (!raw || typeof raw !== "object") return false
+  const exists = await fs.access(file()).then(
+    () => true,
+    () => false
+  )
+  if (exists) return false
+  await writeJsonAtomic(file(), appSettingsSchema.parse(raw))
+  return true
+}
+
 /** Fields left out of the body keep their current value. */
 export async function saveAppSettings(input: unknown): Promise<AppSettings> {
   const current = await getAppSettings()

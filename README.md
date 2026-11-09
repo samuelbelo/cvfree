@@ -15,6 +15,7 @@ Built with Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Base UI) and ReUI.
 - **Photo upload** with a crop dialog. Stored inside the resume, so backups are self-contained.
 - **Header, footer and page numbers** (1, 1/3 or Page 1 of 3) on every PDF page.
 - **Exports.** Pixel-exact PDF (headless Chromium), DOCX, TXT and a JSON backup you can import again.
+- **One-click backup.** Download every resume, cover letter and the settings as one zip from Settings, and restore it on any install.
 - **JSON Resume in and out.** Import a [JSON Resume](https://jsonresume.org) file from another tool, or export one to take your content elsewhere.
 - **Review.** Completeness score and instant writing checks (missing dates, no numbers, passive phrases, summary length...).
 - **Tailor.** Paste a job link or description, get a keyword match score and add missing skills in one click. Save a tailored copy.
@@ -142,7 +143,11 @@ docker compose up -d --build
 
 ### Backup and restore
 
-Everything lives in one Docker volume: the resumes (one JSON file each, photos included) and `settings.json`. The compose file pins the project name, so the volume is always called `cvfree_cvfree-data`. Check with `docker volume ls`.
+The quick way is in the app. **Settings → Backup → Download backup** gives you one zip with every resume, every cover letter and the settings. **Restore from backup** on the same page reads that zip back in, on this install or on a new one. It adds what is missing and replaces a resume or letter only when the zip holds a newer copy, so nothing is deleted and running it twice is harmless. A resume it replaces goes to the version history first. Share links come back as they were. The zip can be up to 100 MB and does not carry the version history.
+
+The zip is laid out like the data folder (`resumes/`, `letters/`, `settings.json`), so you can also unpack it straight into an empty volume.
+
+To copy the whole volume by hand, history included, use Docker. Everything lives in one volume: the resumes and letters (one JSON file each, photos included), the version history and `settings.json`. The compose file pins the project name, so the volume is always called `cvfree_cvfree-data`. Check with `docker volume ls`.
 
 Back up, from the folder with the compose file:
 

@@ -52,6 +52,11 @@ export async function saveLetter(letter: Letter): Promise<Letter> {
   return next
 }
 
+/** Put a cover letter from a backup in place as it was saved, dates included. */
+export async function restoreLetter(letter: Letter): Promise<void> {
+  await writeJsonAtomic(fileFor(letter.id), letter)
+}
+
 export async function deleteLetter(id: string): Promise<boolean> {
   try {
     await fs.unlink(fileFor(id))
