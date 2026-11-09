@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation"
 import { LogOut } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 
 export function LogoutButton() {
+  const t = useT()
   const router = useRouter()
   return (
     <Button
@@ -17,7 +19,7 @@ export function LogoutButton() {
         router.refresh()
       }}
     >
-      <LogOut /> Sign out
+      <LogOut /> {t("Sign out")}
     </Button>
   )
 }

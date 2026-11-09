@@ -4,7 +4,9 @@ import { useState } from "react"
 import { Check, Copy } from "lucide-react"
 import { toast } from "sonner"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
+import { rich } from "@/lib/ui/rich"
 
 type Props = {
   endpoint: string
@@ -13,6 +15,7 @@ type Props = {
 }
 
 function CopyBlock({ label, text }: { label: string; text: string }) {
+  const t = useT()
   const [copied, setCopied] = useState(false)
   const copy = async () => {
     try {
@@ -29,7 +32,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
       const done = document.execCommand("copy")
       area.remove()
       if (!done) {
-        toast.error("Could not copy. Select the text and copy it by hand.")
+        toast.error(t("Could not copy. Select the text and copy it by hand."))
         return
       }
     }
@@ -41,7 +44,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <Button size="sm" variant="ghost" onClick={copy} className="h-7 px-2 text-xs">
-          {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy"}
+          {copied ? <Check /> : <Copy />} {copied ? t("Copied") : t("Copy")}
         </Button>
       </div>
       <pre className="overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs leading-relaxed">{text}</pre>
@@ -51,6 +54,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
 
 /** Connection snippets for the MCP endpoint. The token itself is never shown, only its variable name. */
 export function McpSetup({ endpoint, state }: Props) {
+  const t = useT()
   const header = state === "token" ? ' --header "Authorization: Bearer $CVFREE_MCP_TOKEN"' : ""
   const headers = state === "token" ? `,\n      "headers": { "Authorization": "Bearer <your CVFREE_MCP_TOKEN>" }` : ""
   const claudeCode = `claude mcp add --transport http cvfree ${endpoint}${header}`
@@ -58,23 +62,31 @@ export function McpSetup({ endpoint, state }: Props) {
   return (
     <div className="grid gap-4 px-5 py-4">
       <p className="text-sm text-muted-foreground">
-        Any MCP client (Claude Code, Claude Desktop, Cursor, your own agent) can list, review, edit and export the resumes and
-        cover letters on this instance through <code>{endpoint}</code>. Every write goes through the same checks as the editor.
+        {rich(
+          t(
+            "Any MCP client (Claude Code, Claude Desktop, Cursor, your own agent) can list, review, edit and export the resumes and cover letters on this instance through {endpoint}. Every write goes through the same checks as the editor."
+          ),
+          { endpoint: <code>{endpoint}</code> }
+        )}
       </p>
       {state === "off" ? (
         <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
-          The endpoint is off. The app has a password, so MCP needs its own secret: set <code>CVFREE_MCP_TOKEN</code> (a long
-          random string, for example <code>openssl rand -hex 32</code>) and restart.
+          {rich(
+            t("The endpoint is off. The app has a password, so MCP needs its own secret: set {token} (a long random string, for example {command}) and restart."),
+            { token: <code>CVFREE_MCP_TOKEN</code>, command: <code>openssl rand -hex 32</code> }
+          )}
         </p>
       ) : null}
       {state === "open" ? (
         <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
-          No password and no token: anyone who can reach this port can use the endpoint, like the rest of the app. Set{" "}
-          <code>CVFREE_MCP_TOKEN</code> before exposing it.
+          {rich(
+            t("No password and no token: anyone who can reach this port can use the endpoint, like the rest of the app. Set {token} before exposing it."),
+            { token: <code>CVFREE_MCP_TOKEN</code> }
+          )}
         </p>
       ) : null}
       <CopyBlock label="Claude Code" text={claudeCode} />
-      <CopyBlock label="Claude Desktop, Cursor and others (mcp.json)" text={json} />
+      <CopyBlock label={t("Claude Desktop, Cursor and others (mcp.json)")} text={json} />
     </div>
   )
 }

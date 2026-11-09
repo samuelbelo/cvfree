@@ -1,6 +1,9 @@
+"use client"
+
 import Link from "next/link"
 import { FileText, Settings } from "lucide-react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 
 import { LogoutButton } from "./logout-button"
@@ -19,16 +22,17 @@ export function Logo() {
 }
 
 export function AppHeader({ showLogout }: { showLogout: boolean }) {
+  const t = useT()
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
         <Logo />
         <nav className="ml-auto flex items-center gap-1">
           <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
-            Resumes
+            {t("Resumes")}
           </Button>
           <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/settings" />}>
-            <Settings /> Settings
+            <Settings /> {t("Settings")}
           </Button>
           {showLogout ? <LogoutButton /> : null}
         </nav>

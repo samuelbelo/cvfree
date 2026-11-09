@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,7 +20,7 @@ export function PromptDialog({
   label,
   initial = "",
   placeholder,
-  confirmLabel = "Save",
+  confirmLabel,
   onConfirm,
   onOpenChange,
 }: {
@@ -32,6 +33,7 @@ export function PromptDialog({
   onConfirm: (value: string) => void
   onOpenChange: (open: boolean) => void
 }) {
+  const t = useT()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
@@ -42,7 +44,7 @@ export function PromptDialog({
           label={label}
           initial={initial}
           placeholder={placeholder}
-          confirmLabel={confirmLabel}
+          confirmLabel={confirmLabel ?? t("Save")}
           onConfirm={onConfirm}
           onOpenChange={onOpenChange}
         />
@@ -68,6 +70,7 @@ function PromptForm({
   onConfirm: (value: string) => void
   onOpenChange: (open: boolean) => void
 }) {
+  const t = useT()
   const [value, setValue] = useState(initial)
   return (
     <form
@@ -95,7 +98,7 @@ function PromptForm({
           variant="outline"
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          {t("Cancel")}
         </Button>
         <Button type="submit" disabled={!value.trim()}>
           {confirmLabel}

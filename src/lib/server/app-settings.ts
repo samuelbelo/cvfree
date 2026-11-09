@@ -6,6 +6,7 @@ import path from "node:path"
 import { z } from "zod"
 
 import { LOCALES } from "@/lib/resume/schema"
+import { UI_LOCALES } from "@/lib/ui/translate"
 
 import { config } from "./config"
 import { writeJsonAtomic } from "./repo"
@@ -16,6 +17,8 @@ export const appSettingsSchema = z.object({
   defaultColor: z.string().catch("#1f4e79"),
   defaultLocale: z.enum(LOCALES).catch("en"),
   ownerName: z.string().catch(""),
+  /** Language of the app itself. Each resume keeps its own language. */
+  uiLocale: z.enum(UI_LOCALES).catch("en"),
 })
 
 export type AppSettings = z.infer<typeof appSettingsSchema>

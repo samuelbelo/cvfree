@@ -7,6 +7,7 @@ import { Copy, Download, FileArchive, FileBraces, FilePlus2, FileUp, Mail, Merge
 import { toast } from "sonner"
 
 import { CombineDialog } from "@/components/app/combine-dialog"
+import { useT } from "@/components/app/i18n-provider"
 import { createLetter, LettersPanel } from "@/components/app/letters-panel"
 import { PromptDialog } from "@/components/app/prompt-dialog"
 import { TemplateThumb } from "@/components/editor/template-thumb"
@@ -31,6 +32,7 @@ import {
 import type { LetterSummary } from "@/lib/letter/schema"
 import { completeness } from "@/lib/resume/analysis"
 import type { Resume } from "@/lib/resume/schema"
+import { rich } from "@/lib/ui/rich"
 import { getTemplate } from "@/templates/registry"
 
 /** Same limit as the server, checked here so a huge file fails before the upload. */
@@ -54,6 +56,7 @@ export function Dashboard({
   unreadable?: string[]
   dataDir?: string
 }) {
+  const t = useT()
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
   const zipInput = useRef<HTMLInputElement>(null)
@@ -68,25 +71,25 @@ export function Dashboard({
       const created = await api<{ id: string }>("/api/resumes", { method: "POST", body: JSON.stringify({ mode, data }) })
       router.push(`/resumes/${created.id}`)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not create the resume")
+      toast.error(t(e instanceof Error ? e.message : "Could not create the resume"))
       setBusy(false)
     }
   }
 
   const importLinkedin = async (file: File) => {
     if (file.size > MAX_UPLOAD) {
-      toast.error("This file is larger than the 100 MB this app accepts")
+      toast.error(t("This file is larger than the 100 MB this app accepts"))
       return
     }
     setBusy(true)
     try {
       const res = await fetch("/api/import/linkedin", { method: "POST", headers: { "Content-Type": "application/zip" }, body: file })
       const data = (await res.json().catch(() => null)) as { id?: string; error?: string } | null
-      if (!res.ok || !data?.id) throw new Error(data?.error || `Import failed (${res.status})`)
-      toast.success("LinkedIn profile imported", { description: "Read it through and trim what a resume does not need.", duration: 8000 })
+      if (!res.ok || !data?.id) throw new Error(data?.error || t("Import failed ({status})", { status: res.status }))
+      toast.success(t("LinkedIn profile imported"), { description: t("Read it through and trim what a resume does not need."), duration: 8000 })
       router.push(`/resumes/${data.id}`)
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Import failed", { duration: 10000 })
+      toast.error(t(e instanceof Error ? e.message : "Import failed"), { duration: 10000 })
       setBusy(false)
     }
   }
@@ -99,23 +102,23 @@ export function Dashboard({
       const json = JSON.parse(await file.text())
       const data = json?.resume ?? json
       const created = await api<{ id: string }>("/api/resumes", { method: "POST", body: JSON.stringify({ mode: "import", data }) })
-      toast.success("Resume imported")
+      toast.success(t("Resume imported"))
       router.push(`/resumes/${created.id}`)
     } catch {
-      toast.error("That file is not a cvfree backup or a JSON Resume file")
+      toast.error(t("That file is not a cvfree backup or a JSON Resume file"))
     }
   }
 
   const duplicate = async (r: Resume) => {
     await api(`/api/resumes/${r.id}/duplicate`, { method: "POST", body: "{}" })
-    toast.success("Copy created")
+    toast.success(t("Copy created"))
     router.refresh()
   }
 
   const rename = async (r: Resume, title: string) => {
     if (!title) return
     await api(`/api/resumes/${r.id}`, { method: "PATCH", body: JSON.stringify({ title }) })
-    toast.success("Renamed")
+    toast.success(t("Renamed"))
     router.refresh()
   }
 
@@ -134,7 +137,7 @@ export function Dashboard({
           <TriangleAlert className="mt-0.5 size-4 shrink-0" />
           <div>
             <p className="font-medium">
-              {unreadable.length === 1 ? "One resume file could not be read" : `${unreadable.length} resume files could not be read`}
+              {unreadable.length === 1 ? t("One resume file could not be read") : t("{n} resume files could not be read", { n: unreadable.length })}
             </p>
             <p className="mt-1">
               {unreadable.map((f) => (
@@ -142,52 +145,55 @@ export function Dashboard({
                   {f}
                 </code>
               ))}
-              in <code className="rounded bg-amber-100 px-1">{dataDir}/resumes</code>. They were left untouched. Open the file in a text
-              editor, fix the JSON, or import a backup of it.
+              {rich(t("in {folder}. They were left untouched. Open the file in a text editor, fix the JSON, or import a backup of it."), {
+                folder: <code className="rounded bg-amber-100 px-1">{dataDir}/resumes</code>,
+              })}
             </p>
           </div>
         </div>
       ) : null}
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Your resumes</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("Your resumes")}</h1>
           <p className="mt-1 text-muted-foreground">
-            {resumes.length ? `${resumes.length} resume${resumes.length === 1 ? "" : "s"}. Saved on your server.` : "Create your first resume. It takes a few minutes."}
+            {resumes.length
+              ? t(resumes.length === 1 ? "1 resume. Saved on your server." : "{n} resumes. Saved on your server.", { n: resumes.length })
+              : t("Create your first resume. It takes a few minutes.")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" disabled={busy} />}>
-              <FileUp /> Import
+              <FileUp /> {t("Import")}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuItem className="items-start" onClick={() => fileInput.current?.click()}>
                 <FileBraces className="mt-0.5" />
                 <span className="grid gap-0.5">
-                  JSON file
-                  <span className="text-xs text-muted-foreground">A cvfree backup or a JSON Resume file</span>
+                  {t("JSON file")}
+                  <span className="text-xs text-muted-foreground">{t("A cvfree backup or a JSON Resume file")}</span>
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem className="items-start" onClick={() => zipInput.current?.click()}>
                 <FileArchive className="mt-0.5" />
                 <span className="grid gap-0.5">
-                  LinkedIn profile
-                  <span className="text-xs text-muted-foreground">The zip from Get a copy of your data</span>
+                  {t("LinkedIn profile")}
+                  <span className="text-xs text-muted-foreground">{t("The zip from Get a copy of your data")}</span>
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="outline" onClick={() => create("sample")} disabled={busy}>
-            <Sparkles /> Start from example
+            <Sparkles /> {t("Start from example")}
           </Button>
           <Button onClick={() => create("blank")} disabled={busy}>
-            <FilePlus2 /> New resume
+            <FilePlus2 /> {t("New resume")}
           </Button>
           <input
             ref={fileInput}
             type="file"
             accept="application/json,.json"
-            aria-label="JSON file to import"
+            aria-label={t("JSON file to import")}
             hidden
             onChange={(e) => {
               void importFile(e.target.files?.[0])
@@ -198,7 +204,7 @@ export function Dashboard({
             ref={zipInput}
             type="file"
             accept=".zip,application/zip"
-            aria-label="LinkedIn archive to import"
+            aria-label={t("LinkedIn archive to import")}
             hidden
             onChange={(e) => {
               void importFile(e.target.files?.[0])
@@ -217,7 +223,7 @@ export function Dashboard({
         >
           <span className="grid justify-items-center gap-2">
             <FilePlus2 className="size-8" />
-            <span className="font-medium">New resume</span>
+            <span className="font-medium">{t("New resume")}</span>
           </span>
         </button>
 
@@ -234,38 +240,38 @@ export function Dashboard({
               <Link href={`/resumes/${r.id}`} className="min-w-0 flex-1">
                 <div className="truncate font-medium">{r.title}</div>
                 <div className="truncate text-xs text-muted-foreground">
-                  {getTemplate(r.settings.template).name} · edited {r.updatedAt.slice(0, 10)}
+                  {getTemplate(r.settings.template).name} · {t("edited {date}", { date: r.updatedAt.slice(0, 10) })}
                 </div>
               </Link>
               <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Resume actions" />}>
+                <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("Resume actions")} />}>
                   <MoreVertical />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem onClick={() => router.push(`/resumes/${r.id}`)}>
-                    <Pencil /> Edit
+                    <Pencil /> {t("Edit")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setToRename(r)}>
-                    <Pencil /> Rename
+                    <Pencil /> {t("Rename")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => duplicate(r)}>
-                    <Copy /> Duplicate
+                    <Copy /> {t("Duplicate")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => createLetter(router, r.id)}>
-                    <Mail /> New cover letter
+                  <DropdownMenuItem onClick={() => createLetter(router, r.id, t)}>
+                    <Mail /> {t("New cover letter")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setToCombine(r)} disabled={resumes.length < 2}>
-                    <Merge /> Combine with
+                    <Merge /> {t("Combine with")}
                   </DropdownMenuItem>
                   <DropdownMenuItem render={<a href={`/api/resumes/${r.id}/export?format=pdf`} download />}>
-                    <Download /> Download PDF
+                    <Download /> {t("Download PDF")}
                   </DropdownMenuItem>
                   <DropdownMenuItem render={<a href={`/api/resumes/${r.id}/export?format=json`} download />}>
-                    <Download /> Backup JSON
+                    <Download /> {t("Backup JSON")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant="destructive" onClick={() => setToDelete(r)}>
-                    <Trash2 /> Delete
+                    <Trash2 /> {t("Delete")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -280,7 +286,7 @@ export function Dashboard({
 
       <PromptDialog
         open={Boolean(toRename)}
-        title="Rename resume"
+        title={t("Rename resume")}
         initial={toRename?.title ?? ""}
         onOpenChange={(open) => !open && setToRename(null)}
         onConfirm={(title) => toRename && void rename(toRename, title)}
@@ -289,13 +295,13 @@ export function Dashboard({
       <AlertDialog open={Boolean(toDelete)} onOpenChange={(open) => !open && setToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &quot;{toDelete?.title}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>The file is removed from the server. Download a JSON backup first if you may need it.</AlertDialogDescription>
+            <AlertDialogTitle>{t('Delete "{title}"?', { title: toDelete?.title ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("The file is removed from the server. Download a JSON backup first if you may need it.")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={remove}>
-              Delete
+              {t("Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -306,13 +312,14 @@ export function Dashboard({
 
 /** Same score as the editor's completeness bar, so the dashboard shows which resume still needs work. */
 function ScoreBadge({ resume }: { resume: Resume }) {
+  const t = useT()
   const { score } = completeness(resume)
   return (
     <span
       className={`absolute top-2 right-2 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-white shadow ${
         score >= 80 ? "bg-emerald-600" : score >= 50 ? "bg-amber-500" : "bg-rose-500"
       }`}
-      title="Resume completeness"
+      title={t("Resume completeness")}
     >
       {score}%
     </span>

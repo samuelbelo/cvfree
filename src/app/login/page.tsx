@@ -5,10 +5,12 @@ import { useSearchParams } from "next/navigation"
 import { Loader2, Lock } from "lucide-react"
 
 import { Logo } from "@/components/app/app-header"
+import { useT } from "@/components/app/i18n-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 function LoginForm() {
+  const t = useT()
   const params = useSearchParams()
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -29,7 +31,7 @@ function LoginForm() {
       window.location.href = /^\/(?![/\\])/.test(next) ? next : "/"
     } else {
       const data = (await res.json().catch(() => ({}))) as { error?: string }
-      setError(data.error || "Wrong password")
+      setError(t(data.error || "Wrong password"))
       setLoading(false)
     }
   }
@@ -38,8 +40,8 @@ function LoginForm() {
     <form onSubmit={submit} className="grid w-full max-w-sm gap-4 rounded-2xl border bg-card p-8 shadow-sm">
       <Logo />
       <div>
-        <h1 className="text-xl font-semibold">Sign in</h1>
-        <p className="text-sm text-muted-foreground">This cvfree instance is protected with a password.</p>
+        <h1 className="text-xl font-semibold">{t("Sign in")}</h1>
+        <p className="text-sm text-muted-foreground">{t("This cvfree instance is protected with a password.")}</p>
       </div>
       <div className="relative">
         <Lock className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -48,13 +50,13 @@ function LoginForm() {
           autoFocus
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          placeholder={t("Password")}
           className="h-10 pl-9"
         />
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button type="submit" className="h-10" disabled={!password || loading}>
-        {loading ? <Loader2 className="animate-spin" /> : null} Continue
+        {loading ? <Loader2 className="animate-spin" /> : null} {t("Continue")}
       </Button>
     </form>
   )

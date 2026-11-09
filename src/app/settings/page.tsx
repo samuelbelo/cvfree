@@ -5,47 +5,50 @@ import { BackupPanel } from "@/components/app/backup-panel"
 import { McpSetup } from "@/components/app/mcp-setup"
 import { SettingsForm } from "@/components/app/settings-form"
 import { getAppSettings } from "@/lib/server/app-settings"
+import { rich } from "@/lib/ui/rich"
 import { aiEnabled, config } from "@/lib/server/config"
 import { listLetters } from "@/lib/server/letters"
 import { findChrome } from "@/lib/server/pdf"
 import { listResumes } from "@/lib/server/repo"
+import { translator } from "@/lib/ui/translate"
 
 export const dynamic = "force-dynamic"
 
 export default async function SettingsPage() {
   const [settings, resumes, letters] = await Promise.all([getAppSettings(), listResumes(), listLetters()])
+  const t = translator(settings.uiLocale)
   const chrome = findChrome()
   const h = await headers()
   const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim() || "http"
   const endpoint = `${proto}://${h.get("host") ?? "localhost:3000"}/mcp`
   const mcpState = config.mcpToken ? "token" : config.password ? "off" : "open"
   const status = [
-    { label: "Data folder", value: config.dataDir, ok: true, hint: "Back this folder up to keep your resumes safe." },
+    { label: t("Data folder"), value: config.dataDir, ok: true, hint: t("Back this folder up to keep your resumes safe.") },
     {
-      label: "PDF engine",
-      value: chrome ?? "Not found",
+      label: t("PDF engine"),
+      value: chrome ?? t("Not found"),
       ok: Boolean(chrome),
-      hint: chrome ? "Headless Chrome renders pixel-exact PDFs." : "Install Chrome/Chromium or set CHROME_PATH. Browser printing still works.",
+      hint: chrome ? t("Headless Chrome renders pixel-exact PDFs.") : t("Install Chrome/Chromium or set CHROME_PATH. Browser printing still works."),
     },
     {
-      label: "AI features",
-      value: aiEnabled() ? `${config.ai.model} via ${config.ai.baseUrl}` : "Off",
+      label: t("AI features"),
+      value: aiEnabled() ? `${config.ai.model} via ${config.ai.baseUrl}` : t("Off"),
       ok: aiEnabled(),
-      hint: "Set AI_MODEL, AI_API_KEY and AI_BASE_URL (any OpenAI-compatible API, Ollama included).",
+      hint: t("Set AI_MODEL, AI_API_KEY and AI_BASE_URL (any OpenAI-compatible API, Ollama included)."),
     },
     {
-      label: "Password",
-      value: config.password ? "On" : "Off",
+      label: t("Password"),
+      value: config.password ? t("On") : t("Off"),
       ok: Boolean(config.password),
-      hint: "Set CVFREE_PASSWORD before exposing the app on the internet.",
+      hint: t("Set CVFREE_PASSWORD before exposing the app on the internet."),
     },
     {
       label: "MCP",
-      value: mcpState === "token" ? "On, token required" : mcpState === "open" ? "On, no token" : "Off",
+      value: mcpState === "token" ? t("On, token required") : mcpState === "open" ? t("On, no token") : t("Off"),
       ok: mcpState === "token",
-      hint: "Lets an AI assistant edit the resumes. See the MCP section below.",
+      hint: t("Lets an AI assistant edit the resumes. See the MCP section below."),
     },
-    { label: "Version", value: config.version, ok: true, hint: "" },
+    { label: t("Version"), value: config.version, ok: true, hint: "" },
   ]
 
   return (
@@ -53,19 +56,19 @@ export default async function SettingsPage() {
       <AppHeader showLogout={Boolean(config.password)} />
       <main className="mx-auto grid max-w-3xl gap-6 px-4 py-10">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
-          <p className="mt-1 text-muted-foreground">Defaults for new resumes and the state of this instance.</p>
+          <h1 className="text-3xl font-semibold tracking-tight">{t("Settings")}</h1>
+          <p className="mt-1 text-muted-foreground">{t("Defaults for new resumes and the state of this instance.")}</p>
         </div>
 
         <SettingsForm initial={settings} />
 
         <section className="rounded-xl border bg-card shadow-xs">
-          <h2 className="border-b px-5 py-3 font-semibold">Backup</h2>
+          <h2 className="border-b px-5 py-3 font-semibold">{t("Backup")}</h2>
           <BackupPanel resumes={resumes.length} letters={letters.length} />
         </section>
 
         <section className="rounded-xl border bg-card shadow-xs">
-          <h2 className="border-b px-5 py-3 font-semibold">Instance</h2>
+          <h2 className="border-b px-5 py-3 font-semibold">{t("Instance")}</h2>
           <dl className="divide-y">
             {status.map((s) => (
               <div key={s.label} className="grid gap-1 px-5 py-3 sm:grid-cols-[10rem_1fr]">
@@ -81,8 +84,10 @@ export default async function SettingsPage() {
             ))}
           </dl>
           <p className="border-t px-5 py-3 text-xs text-muted-foreground">
-            These values come from environment variables. Change them in your <code>.env</code> or{" "}
-            <code>docker-compose.yml</code> and restart.
+            {rich(t("These values come from environment variables. Change them in your {env} or {compose} and restart."), {
+              env: <code>.env</code>,
+              compose: <code>docker-compose.yml</code>,
+            })}
           </p>
         </section>
 
