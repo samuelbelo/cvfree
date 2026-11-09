@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["puppeteer-core"],
   experimental: {
     // Request bodies pass through the proxy, which keeps only the first 10 MB by default.
-    // A backup with a few photos is larger than that. Keep in step with MAX_UPLOAD in api/backup.
+    // A backup with a few photos is larger than that. Keep in step with MAX_UPLOAD in lib/server/upload.
     proxyClientMaxBodySize: "100mb",
   },
   async headers() {
