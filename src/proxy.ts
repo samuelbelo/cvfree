@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 import { isValidSession, SESSION_COOKIE } from "@/lib/auth"
 
 // /s/<token> is the public read-only link. The token is the whole secret.
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health", "/s", "/api/s"]
+// /mcp checks its own bearer token in the route, since MCP clients have no cookie.
+const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/health", "/s", "/api/s", "/mcp"]
 
 export async function proxy(request: NextRequest) {
   const password = process.env.CVFREE_PASSWORD || ""

@@ -6,6 +6,8 @@ import path from "node:path"
 export const config = {
   dataDir: path.resolve(/*turbopackIgnore: true*/ process.env.DATA_DIR || path.join(process.cwd(), "data")),
   password: process.env.CVFREE_PASSWORD || "",
+  /** Bearer token for the MCP endpoint. With a password set and no token, /mcp stays off. */
+  mcpToken: process.env.CVFREE_MCP_TOKEN || "",
   /** Where the headless browser reaches the app to print PDFs. */
   internalUrl: (process.env.INTERNAL_URL || `http://127.0.0.1:${process.env.PORT || 3000}`).replace(/\/$/, ""),
   chromePath: process.env.CHROME_PATH || process.env.PUPPETEER_EXECUTABLE_PATH || "",
