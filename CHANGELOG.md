@@ -1,3 +1,19 @@
+## [0.4.0](https://github.com/samuelbelo/cvfree/compare/v0.3.0...v0.4.0) (2026-11-09)
+
+### Features
+
+* combine two resumes into a new one ([dfad5a3](https://github.com/samuelbelo/cvfree/commit/dfad5a334bd6ae89d91a3f8e43041f74c2e5f07e))
+* sentence starters for the summary and job bullets, by role family ([45919f3](https://github.com/samuelbelo/cvfree/commit/45919f3f3ba592be124b3655a01e4cfdb0c4e100))
+* version history with a copy kept before each save and one-click restore ([cac10dc](https://github.com/samuelbelo/cvfree/commit/cac10dc78e24b0e8c828972d4ce2c82300cb35d9))
+
+### Fixes
+
+* keep the Restore button visible for long resume names in the history ([b7b0d1b](https://github.com/samuelbelo/cvfree/commit/b7b0d1bd376179ae735d049dd1fc14faac4023c9))
+
+### Documentation
+
+* starters, version history and combine in the README ([baaf7ce](https://github.com/samuelbelo/cvfree/commit/baaf7ceba1cb3eb6eaa3548c3efc4bee59e8a64c))
+
 ## [0.3.0](https://github.com/samuelbelo/cvfree/compare/v0.2.0...v0.3.0) (2026-11-06)
 
 ### Features
