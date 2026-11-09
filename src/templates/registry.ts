@@ -94,7 +94,7 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     id: "bold",
-    name: "Bold",
+    name: "Marquee",
     description: "Heavy name block and filled section tags. Hard to miss.",
     tags: ["photo", "creative"],
     supportsPhoto: true,
